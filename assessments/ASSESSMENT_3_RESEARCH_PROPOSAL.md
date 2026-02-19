@@ -139,15 +139,6 @@ graph TD
     J --> K["Model Evaluation<br/>(MAE, RMSE, MAPE on test set)"]
     K --> L["Forecast Generation<br/>(2-4 weeks ahead with confidence intervals)"]
     L --> M["Results Interpretation<br/>& Reporting"]
-
-    style A fill:#e1f5ff
-    style B fill:#fff3e0
-    style D fill:#c8e6c9
-    style E fill:#ffe0b2
-    style F fill:#f0f4c3
-    style H fill:#f8bbd0
-    style J fill:#d1c4e9
-    style M fill:#c8e6c9
 ```
 
 ### 3.2 Data Collection: Source, Scope, and Selection Criteria
