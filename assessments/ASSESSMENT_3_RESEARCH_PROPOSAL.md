@@ -126,20 +126,54 @@ The analytical approach is fundamentally iterative and comparative. Rather than 
 
 ```mermaid
 graph TD
-    A["Reddit Data Collection<br/>(16-week academic semester)"] --> B["NLP Classification<br/>(VADER + RoBERTa hybrid)"]
-    B --> C{"Classification<br/>Concordance?"}
+    A["Reddit Data Collection<br/>(16-week academic semester)"]
+
+    A --> B["NLP Classification<br/>VADER + RoBERTa Hybrid"]
+    B --> C{"Concordant<br/>Classifications?"}
     C -->|Yes| D["High Confidence<br/>Classification"]
     C -->|No| E["Manual Review<br/>by Principal Investigator"]
-    D --> F["Temporal Aggregation<br/>(Daily stress mention counts)"]
+    D --> F["Consolidated<br/>Classification Dataset"]
     E --> F
-    F --> G["Descriptive Analysis<br/>(ACF/PACF, variance assessment)"]
-    G --> H["Count Regression Modeling<br/>(Poisson vs Negative Binomial GLM)"]
-    H --> I["Model Selection<br/>(AIC/BIC comparison)"]
-    I --> J["Time-Series Forecasting<br/>(Prophet, ARIMA, LSTM)"]
-    J --> K["Model Evaluation<br/>(MAE, RMSE, MAPE on test set)"]
-    K --> L["Forecast Generation<br/>(2-4 weeks ahead with confidence intervals)"]
-    L --> M["Results Interpretation<br/>& Reporting"]
+
+    F --> G["Temporal Aggregation<br/>Daily Stress Mention Counts"]
+    G --> H["Descriptive Analysis<br/>ACF/PACF, Variance-to-Mean Ratio"]
+
+    H --> I["Count Regression Model 1<br/>Poisson GLM"]
+    H --> J["Count Regression Model 2<br/>Negative Binomial GLM"]
+    I --> K["Model Selection<br/>AIC/BIC Comparison"]
+    J --> K
+
+    K --> L["Time-Series Forecasting<br/>Model 1: Prophet"]
+    K --> M["Time-Series Forecasting<br/>Model 2: ARIMA"]
+    K --> N["Time-Series Forecasting<br/>Model 3: LSTM"]
+
+    L --> O["Model Evaluation<br/>MAE, RMSE, MAPE on Test Set"]
+    M --> O
+    N --> O
+
+    O --> P["Forecast Generation<br/>2-4 Weeks Ahead with Confidence Intervals"]
+    P --> Q["Results Interpretation<br/>& Reporting"]
+
+    style A fill:#e1f5ff
+    style B fill:#fff3e0
+    style C fill:#ffe082
+    style D fill:#c8e6c9
+    style E fill:#ffe0b2
+    style F fill:#b2dfdb
+    style G fill:#f0f4c3
+    style H fill:#f0f4c3
+    style I fill:#f8bbd0
+    style J fill:#f8bbd0
+    style K fill:#ffccbc
+    style L fill:#d1c4e9
+    style M fill:#d1c4e9
+    style N fill:#d1c4e9
+    style O fill:#ffe0b2
+    style P fill:#c8e6c9
+    style Q fill:#c8e6c9
 ```
+
+**Figure 3.1.** Methodology Pipeline Visualization
 
 ### 3.2 Data Collection: Source, Scope, and Selection Criteria
 
@@ -360,6 +394,8 @@ gantt
     Prophet & ARIMA Implementation :fc1, 2026-04-13, 7d
     Model Evaluation & Report Synthesis :fc2, 2026-04-20, 7d
 ```
+
+**Figure 4.1.** Project Timeline (March–April 2026)
 
 ### 4.3 Resource Requirements
 
