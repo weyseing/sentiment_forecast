@@ -23,11 +23,12 @@
 
 2. The Research Proposal must include the following sections:
    - **Title** – A clear and concise title that reflects the focus of your project
-   - **Introduction** – Overview of the project, problem statement, research questions, aim, objectives and scope of work
-   - **Literature Review** – Critical review of existing research works relevant to the project (you may draw from Assessment 2)
-   - **Methodology** – Description of the framework or methods used to execute the project
-   - **Work Plan and Timeline** – Description of the work activities and timeline for the project
-   - **References** – List of all sources cited in the proposal
+   - **1. Introduction** – Overview of the project, problem statement, research questions, aim, objectives and scope of work
+   - **2. Literature Review** – Critical review of existing research works relevant to the project (you may draw from Assessment 2)
+   - **3. Methodology** – Description of the framework or methods used to execute the project
+   - **4. Work Plan and Timeline** – Description of the work activities and timeline for the project
+   - **5. Conclusion** – Summary of the project's significance, expected contributions, and implications
+   - **6. References** – List of all sources cited in the proposal
 
 3. **Writing Standards**: Ensure your report is written with correct spelling, grammar, sentences, paragraphing and in-text referencing. Bullet points or numbering are allowed when broken down into sections with headings and sub-headings.
 

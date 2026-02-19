@@ -422,13 +422,13 @@ Technical issues during implementation could disrupt progress. Early testing dur
 
 ---
 
-## Conclusion
+## 5. Conclusion
 
 This research proposal presents a feasible and methodologically rigorous capstone project that directly addresses a significant gap in student mental health monitoring (Addressing mental health, 2024). By integrating hybrid NLP approaches with count-based statistical modeling and time-series forecasting, the research creates a novel framework that transforms sentiment analysis from descriptive to predictive, enabling proactive intervention planning (Mental health in digital, 2025). The eight-week execution timeline is realistic and flexible, with clearly defined phases, manageable resource requirements, and robust risk mitigation strategies. The project's emphasis on methodological integration, ethical considerations, and practical applicability positions it to make meaningful contributions to both data science and higher education (Hochreiter & Schmidhuber, 1997), while providing a comprehensive proof-of-concept for monitoring student well-being through online discourse (Lindén & Mäntyniemi, 2011).
 
 ---
 
-## References
+## 6. References
 
 Academic stress and mental well-being in college students. (2021). PMC, PMC9169886. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9169886/
 
