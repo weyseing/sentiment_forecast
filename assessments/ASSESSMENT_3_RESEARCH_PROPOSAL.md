@@ -1,121 +1,49 @@
 # Assessment 3: Research Proposal
 
-## Overview
+**Forecasting Mental Health Sentiment Surges: A Time-Series Analysis of Reddit Discourse**
 
-| Detail | Information |
-|--------|-------------|
-| **Task Type** | Report |
-| **Method** | Individual |
-| **Weighting** | 50% |
-| **Due Date** | 23:59 MYT Tuesday, Week 7 |
-| **Length** | 12-15 pages (4500-6000 words) |
+---
 
-## Subject Learning Outcomes
+## 1. Introduction
 
-- **SLO3**: Design a data science project for the identified problem space (C5)
-- **SLO4**: Verify the choice of principles and theories from data science which are used for the identified problem space (A5)
+### 1.1 Background and Context
 
-## Instructions
+The rapid expansion of online academic communities has fundamentally transformed how university students communicate, seek support, and express emotional distress. Platforms such as Reddit host large, topic-specific communities (subreddits) where students openly discuss academic pressures, mental health challenges, and experiences related to university life. These digital spaces generate vast amounts of unstructured textual data that offer valuable opportunities for understanding student well-being at scale. Unlike traditional institutional surveys or clinical assessments, which capture only snapshots of mental health at specific moments, online communities provide continuous, real-time records of student sentiment and emotional expression.
 
-1. The Research Proposal outlines the plan and objectives for your Capstone Project. The proposal serves as a detailed roadmap that demonstrates the originality, significance and feasibility of your project.
+Advances in data science, particularly in Natural Language Processing (NLP) and statistical time-series modelling, now enable the extraction of meaningful psychological signals from online discourse. This technological shift is gradually moving mental health monitoring from retrospective, survey-based approaches toward continuous, data-driven analysis. Rather than waiting for students to self-report distress through institutional channels, researchers can now analyze the linguistic patterns embedded in online conversations to detect emerging mental health trends. This represents a significant methodological opportunity, as social media data offers granularity, timeliness, and scale that traditional methods cannot achieve.
 
-2. The Research Proposal must include the following sections:
-   - **Title** – A clear and concise title that reflects the focus of your project
-   - **Introduction** – Overview of the project, problem statement, research questions, aim, objectives and scope of work
-   - **Literature Review** – Critical review of existing research works relevant to the project (you may draw from Assessment 2)
-   - **Methodology** – Description of the framework or methods used to execute the project
-   - **Work Plan and Timeline** – Description of the work activities and timeline for the project
-   - **References** – List of all sources cited in the proposal
+Student mental health has emerged as a critical global concern, particularly within higher education institutions. Academic workload, high-stakes examinations, financial pressures, and social isolation are consistently linked to elevated levels of anxiety, depression, and psychological distress. Traditional monitoring approaches, including self-report surveys, campus mental health services uptake, and institutional assessments suffer from well-documented limitations: low response rates, reporting bias, temporal delays, and inability to capture the full spectrum of student distress. Consequently, there is growing scholarly interest in leveraging digital traces from online platforms to provide real-time or near-real-time indicators of mental health trends, enabling universities to respond proactively rather than reactively.
 
-3. **Writing Standards**: Ensure your report is written with correct spelling, grammar, sentences, paragraphing and in-text referencing. Bullet points or numbering are allowed when broken down into sections with headings and sub-headings.
+### 1.2 Problem Statement
 
-## Submission Guidelines
+Despite the potential of social media data for monitoring student well-being, several critical challenges remain unresolved. First, most existing research focuses on static sentiment classification or cross-sectional analyses, with limited attention to the temporal dynamics of emotional expression. While researchers have successfully developed methods to classify individual posts as positive, negative, or neutral, they have rarely examined how aggregated sentiment signals fluctuate over time in response to predictable academic events such as midterms or final examinations. This temporal gap is particularly problematic because stress among students is not randomly distributed but episodic, clustering around specific academic calendar events.
 
-- **Word Count**: 4500-6000 words (excluding table of contents and references, but including tables and figures). State word count on the last page before References.
+Second, significant debate persists regarding the most effective methods for detecting mental health signals from social media text. Lexicon-based sentiment models (such as VADER) offer interpretability and computational efficiency but often fail to capture context, sarcasm, and implicit expressions of stress. In contrast, transformer-based deep learning models (such as RoBERTa and BERT) demonstrate superior accuracy in detecting nuanced emotional states but sacrifice interpretability and require greater computational resources. To date, few studies have systematically compared these approaches or explored hybrid methods that balance accuracy with explainability.
 
-- **Formatting**: Submit as a Word Document with:
-  - A4 portrait size paper
-  - 1-inch page margins
-  - Times New Roman 12pt font
-  - 1.5 line spacing
-  - Justified text alignment
+Third, there is limited integration of NLP-derived sentiment signals with rigorous statistical forecasting approaches. Existing research treats sentiment as isolated findings rather than as input for predictive models. When NLP and forecasting have been combined, the methodological rigor often diminishes, particularly regarding the handling of count-based data exhibiting overdispersion and temporal autocorrelation. This gap is consequential: without predictive integration, sentiment analysis remains descriptive rather than actionable, providing historical insights but no forward-looking capability for intervention planning.
 
-- **File Naming Convention**: `Programme_Name_Student_ID_Full_Name_Course_Code_SL_Name_Assessment_Number`
+### 1.3 Research Objective and Specific Objectives
 
-- **Cover Page**: Include both the Assessment and Capstone cover page (as provided in the Assessment overview section)
+This research proposal outlines a systematic framework that integrates NLP-based sentiment analysis with statistical time-series forecasting to examine temporal patterns in student emotional expression on social media and identify periods of heightened psychological demand. The overarching goal is to develop and validate a proactive, data-driven system capable of predicting stress surges among students without relying on institution-specific academic calendars, thereby enabling timely mental health interventions.
 
-- **Referencing Style**: Use APA 7th edition. No footnotes. Present tables and figures (with labels and references) in the main report for readability, not in appendices.
+To achieve this primary objective, the research will pursue three specific sub-objectives:
 
-- **Generative AI Tools**: Refer to "Guidelines for Students: Using Generative AI Tools for Learning and Research" by Academic Enhancement Division, Sunway University
+**Objective 1:** Analyze temporal fluctuations and trends in aggregated student sentiment over extended periods, with particular focus on identifying recurring periods of elevated psychological strain. This involves extracting stress-related posts, aggregating them into time-indexed counts, and examining autocorrelation and seasonality patterns.
 
-- **Turnitin Similarity Check**: After submitting on XLearn, ensure Turnitin similarity index is **no more than 15%**
-  - Higher scores will be flagged for plagiarism
-  - You may delete and resubmit before the due date if needed
+**Objective 2:** Compare the effectiveness of lexicon-based and transformer-based NLP models in detecting mental health-related signals from student-generated social media content. This comparative analysis will evaluate both the sensitivity and specificity of different approaches and explore whether hybrid methods can combine the strengths of both paradigms.
 
-## Plagiarism Assessment and Penalties
+**Objective 3:** Apply appropriate statistical and time-series forecasting models to sentiment-derived count data to predict future periods of increased psychological stress. This involves fitting count regression models, evaluating temporal dependencies, and developing forecasts that can be operationalized for resource allocation and intervention planning.
 
-Student's report with a Turnitin similarity score of more than 15% will be investigated to ensure fairness and consistency in assessment. If deemed plagiarism, it will be considered academic malpractice. All alleged academic malpractice will be handled, investigated, and decided upon according to the Academic Malpractice Policy and Procedure. You can refer to the Student Handbook and Sunway University's Academic Malpractice Policy and Procedure from the iZone system.
+### 1.4 Significance and Contributions
 
-## Marking Rubric
+This research contributes to the field in three distinct dimensions. **Theoretically**, it bridges two traditionally separate research domains, text-based sentiment analysis and statistical forecasting, offering a novel methodological framework for understanding student mental health. By integrating NLP with count-based statistical modeling and time-series forecasting, the project advances both the data science and higher education fields.
 
-### Introduction [20%]
+**Practically**, the research has immediate institutional applicability. Universities struggle to allocate limited mental health resources efficiently. By providing predictive insights into periods of heightened stress, this framework enables administrators to proactively allocate counseling services, schedule support programs, and deploy interventions at moments of greatest need. This capability transforms reactive mental health responses into proactive, evidence-based planning.
 
-| Grade | Criteria |
-|-------|----------|
-| **Outstanding, A+ (80%-100%)** | Clearly sets the stage and establishes the topic's significance. Articulates a well-defined and focused problem statement and research question that address a clear gap in existing knowledge. Provides a strong roadmap for the project. |
-| **Excellent, A to A- (70%-79%)** | Introduction is adequate but may lack some depth in establishing significance. Problem statement and research question are clear but may need some refinement in focus. Roadmap is present but could be more detailed. |
-| **Good, B+ (65%-69%)** | Introduction is present but lacks clarity or significance. Problem statement and research question are unclear or poorly defined. Roadmap is missing or underdeveloped. |
-| **Satisfactory, B (60%-64%)** | Introduction is weak or missing entirely. Problem statement and research question are absent or irrelevant. No roadmap provided. |
-| **Fail (0%-59%)** | No Introduction section or completely irrelevant content. |
+**Ethically and socially**, this project contributes to broader Sustainable Development Goals, specifically SDG03 (Good Health and Well-Being) and SDG04 (Quality Education). By developing tools to monitor and support student mental health, the research promotes evidence-based strategies to safeguard well-being in academic settings. Furthermore, the research emphasizes responsible data use, privacy protection, and transparent algorithmic decision-making, aligning with contemporary ethical standards in AI and data science.
 
-### Literature Review [20%]
+### 1.5 Scope of the Research Proposal
 
-| Grade | Criteria |
-|-------|----------|
-| **Outstanding, A+ (80%-100%)** | Demonstrates a comprehensive and critical analysis of relevant scholarly literature. Effectively identifies strengths, weaknesses, and limitations of existing research. Clearly positions the current project within the existing body of knowledge and highlights its originality. Uses citations seamlessly and maintains a complete reference list. |
-| **Excellent, A to A- (70%-79%)** | Literature review covers relevant sources but may lack depth in analysis. Identifies some strengths and weaknesses of existing research. Positions the project within the field but needs more emphasis on originality. Citations are mostly used correctly, but minor errors may be present. |
-| **Good, B+ (65%-69%)** | Literature review is present but may be limited in scope or lack critical analysis. Strengths and weaknesses of existing research are not adequately addressed. Project's position within the field is unclear. Citations are present but may have formatting or accuracy issues. |
-| **Satisfactory, B (60%-64%)** | Literature review is weak or superficial. Limited or no analysis of existing research. Project's contribution to the field is not addressed. Citations are missing or used incorrectly. |
-| **Fail (0%-59%)** | No Literature Review section or completely irrelevant content. |
+This proposal outlines a capstone research project focused on Reddit-based academic communities as a case study for predictive mental health monitoring. The research encompasses data collection, NLP implementation, statistical modeling, and forecasting, with explicit attention to methodological limitations and ethical considerations. While the project uses Reddit data from specific subreddits, findings may be generalizable to other online academic communities with similar characteristics. However, the proposal acknowledges that social media users may not represent the full student population, and results should be interpreted within this context.
 
-### Research Methodology [40%]
-
-| Grade | Criteria |
-|-------|----------|
-| **Outstanding, A+ (80%-100%)** | Provides a clear and detailed justification for chosen research methods. Explains the research design, data collection procedures, and data analysis techniques in a comprehensive way. Addresses potential limitations of the methods and explains how they were mitigated. Demonstrates ethical considerations throughout the research process. |
-| **Excellent, A to A- (70%-79%)** | Justification for methods is adequate but could benefit from additional detail. Research design, data collection, and analysis are explained but may lack some clarity. Acknowledges potential limitations of the methods but may not fully explain mitigation strategies. Ethical considerations are addressed but could be elaborated upon. |
-| **Good, B+ (65%-69%)** | Justification for methods is present but may be weak or unclear. Research design, data collection, and analysis are explained but lack sufficient detail. Limitations of the methods are not fully addressed, or mitigation strategies are unclear. Ethical considerations are mentioned but may be underdeveloped. |
-| **Satisfactory, B (60%-64%)** | Justification for methods is weak or missing. Research design, data collection, and analysis are poorly explained or missing key information. Limitations of the methods are not considered or addressed. Ethical considerations are absent. |
-| **Fail (0%-59%)** | No Research Methodology section or completely irrelevant content. |
-
-### Work Plan and Timeline [10%]
-
-| Grade | Criteria |
-|-------|----------|
-| **Outstanding, A+ (80%-100%)** | Presents a well-defined and realistic work plan with clear milestones and timelines. Demonstrates a logical sequence of research activities. Anticipates potential challenges and outlines mitigation strategies. |
-| **Excellent, A to A- (70%-79%)** | Work plan and timeline are present but may lack some detail or clarity. Sequence of activities may be logical but could benefit from refinement. Potential challenges are acknowledged but mitigation strategies may be underdeveloped. |
-| **Good, B+ (65%-69%)** | Work plan and timeline are present but may be poorly defined or unrealistic. Sequence of activities may be unclear or illogical. Potential challenges are not fully addressed, or mitigation strategies are missing. |
-| **Satisfactory, B (60%-64%)** | Work plan and timeline are weak or missing significant details. Sequence of activities is unclear or illogical. No consideration for potential challenges. |
-| **Fail (0%-59%)** | No Work Plan and Timeline section or completely irrelevant content. |
-
-### Writing and Document Presentation [10%]
-
-| Grade | Criteria |
-|-------|----------|
-| **Outstanding, A+ (80%-100%)** | Writing is clear, concise, and professional with proper grammar and mechanics. Document is well-organised, formatted consistently, and visually appealing. Citations are accurate and formatted according to the university's style guide. Tables, figures, and charts are clear, well-labelled, and easy to understand. |
-| **Excellent, A to A- (70%-79%)** | Writing is mostly clear and professional but may contain some minor grammatical errors. Document is generally well-organised but may have some inconsistencies in formatting. Citations are mostly accurate but may have some minor formatting errors. Tables, figures, and charts are mostly clear and well-labelled but may need some improvement. |
-| **Good, B+ (65%-69%)** | Writing is generally clear and concise but may contain a few grammatical errors or instances of unclear language. Document is mostly well-organised with some inconsistencies in formatting that may require minor revisions. Citations are mostly accurate but may have some formatting errors that don't significantly hinder understanding. Tables, figures, and charts are clear and well-labelled, but may have some room for improvement in clarity or presentation. |
-| **Satisfactory, B (60%-64%)** | Writing may contain grammatical errors or unclear language that somewhat affects readability. Document may have inconsistencies in formatting or organisation that distract slightly from the content. Citations may have some formatting or accuracy issues, but the overall meaning remains clear. Tables, figures, and charts may be unclear in some respects or have minor labelling issues, but the general message is understandable. |
-| **Fail (0%-59%)** | Writing is unclear or ungrammatical to the point of hindering understanding. Document is poorly organised, formatted inconsistently, and visually unappealing. Citations are missing or completely inaccurate. Tables, figures, and charts are unclear, poorly labelled, or incomprehensible. |
-
-## Support
-
-For further support, please visit Important Contacts for a range of support services to help you in your learning.
-
-## Academic Integrity
-
-Assessment plagiarism, cheating, fabrication, falsification of data or any form of assessment dishonesty is a misconduct. Refer to the Programme Handbook for more information regarding student responsibilities.
-
-## Assessment Extensions
-
-You can find information on how to request for an assessment extension in the Subject Outline. You can find more important information regarding penalties for late assessment submissions, publication of results, return of marked assessments and re-sit in the Programme Handbook.
+The project does not involve direct intervention with students, clinical diagnosis, or institutional policy changes. Rather, it provides a methodological foundation and proof-of-concept that could inform future institutional applications. Furthermore, while the research addresses several methodological gaps identified in the literature, it recognizes that some challenges, such as the inherent noise in social media data and the difficulty of validating ground-truth stress, remain complex and may require ongoing refinement.
