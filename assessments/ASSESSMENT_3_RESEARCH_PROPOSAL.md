@@ -8,23 +8,23 @@
 
 ### 1.1 Background and Context
 
-The rapid expansion of online academic communities has fundamentally transformed how university students communicate, seek support, and express emotional distress. Platforms such as Reddit host large, topic-specific communities (subreddits) where students openly discuss academic pressures, mental health challenges, and experiences related to university life. These digital spaces generate vast amounts of unstructured textual data that offer valuable opportunities for understanding student well-being at scale. Unlike traditional institutional surveys or clinical assessments, which capture only snapshots of mental health at specific moments, online communities provide continuous, real-time records of student sentiment and emotional expression.
+The rapid expansion of online academic communities has fundamentally transformed how university students communicate, seek support, and express emotional distress (Massanari & Proferes, 2020). Platforms such as Reddit host large, topic-specific communities (subreddits) where students openly discuss academic pressures, mental health challenges, and experiences related to university life (Morini et al., 2024). These digital spaces generate vast amounts of unstructured textual data that offer valuable opportunities for understanding student well-being at scale. Unlike traditional institutional surveys or clinical assessments, which capture only snapshots of mental health at specific moments, online communities provide continuous, real-time records of student sentiment and emotional expression (Guntuku et al., 2017).
 
-Advances in data science, particularly in Natural Language Processing (NLP) and statistical time-series modelling, now enable the extraction of meaningful psychological signals from online discourse. This technological shift is gradually moving mental health monitoring from retrospective, survey-based approaches toward continuous, data-driven analysis. Rather than waiting for students to self-report distress through institutional channels, researchers can now analyze the linguistic patterns embedded in online conversations to detect emerging mental health trends. This represents a significant methodological opportunity, as social media data offers granularity, timeliness, and scale that traditional methods cannot achieve.
+Advances in data science, particularly in Natural Language Processing (NLP) and statistical time-series modelling, now enable the extraction of meaningful psychological signals from online discourse (Coppersmith et al., 2015). This technological shift is gradually moving mental health monitoring from retrospective, survey-based approaches toward continuous, data-driven analysis (Screening for depression, 2024). Rather than waiting for students to self-report distress through institutional channels, researchers can now analyze the linguistic patterns embedded in online conversations to detect emerging mental health trends. This represents a significant methodological opportunity, as social media data offers granularity, timeliness, and scale that traditional methods cannot achieve.
 
-Student mental health has emerged as a critical global concern, particularly within higher education institutions. Academic workload, high-stakes examinations, financial pressures, and social isolation are consistently linked to elevated levels of anxiety, depression, and psychological distress. Traditional monitoring approaches, including self-report surveys, campus mental health services uptake, and institutional assessments suffer from well-documented limitations: low response rates, reporting bias, temporal delays, and inability to capture the full spectrum of student distress. Consequently, there is growing scholarly interest in leveraging digital traces from online platforms to provide real-time or near-real-time indicators of mental health trends, enabling universities to respond proactively rather than reactively.
+Student mental health has emerged as a critical global concern, particularly within higher education institutions (Kessler et al., 2005). Academic workload, high-stakes examinations, financial pressures, and social isolation are consistently linked to elevated levels of anxiety, depression, and psychological distress (Examining the effects, 2025). Traditional monitoring approaches, including self-report surveys, campus mental health services uptake, and institutional assessments suffer from well-documented limitations: low response rates, reporting bias, temporal delays, and inability to capture the full spectrum of student distress. Consequently, there is growing scholarly interest in leveraging digital traces from online platforms to provide real-time or near-real-time indicators of mental health trends, enabling universities to respond proactively rather than reactively (Digital tools, 2024).
 
 ### 1.2 Problem Statement
 
-Despite the potential of social media data for monitoring student well-being, several critical challenges remain unresolved. First, most existing research focuses on static sentiment classification or cross-sectional analyses, with limited attention to the temporal dynamics of emotional expression. While researchers have successfully developed methods to classify individual posts as positive, negative, or neutral, they have rarely examined how aggregated sentiment signals fluctuate over time in response to predictable academic events such as midterms or final examinations. This temporal gap is particularly problematic because stress among students is not randomly distributed but episodic, clustering around specific academic calendar events.
+Despite the potential of social media data for monitoring student well-being, several critical challenges remain unresolved. First, most existing research focuses on static sentiment classification or cross-sectional analyses, with limited attention to the temporal dynamics of emotional expression (Mental health analysis, 2022). While researchers have successfully developed methods to classify individual posts as positive, negative, or neutral, they have rarely examined how aggregated sentiment signals fluctuate over time in response to predictable academic events such as midterms or final examinations (Early detection, 2024). This temporal gap is particularly problematic because stress among students is not randomly distributed but episodic, clustering around specific academic calendar events.
 
-Second, significant debate persists regarding the most effective methods for detecting mental health signals from social media text. Lexicon-based sentiment models (such as VADER) offer interpretability and computational efficiency but often fail to capture context, sarcasm, and implicit expressions of stress. In contrast, transformer-based deep learning models (such as RoBERTa and BERT) demonstrate superior accuracy in detecting nuanced emotional states but sacrifice interpretability and require greater computational resources. To date, few studies have systematically compared these approaches or explored hybrid methods that balance accuracy with explainability.
+Second, significant debate persists regarding the most effective methods for detecting mental health signals from social media text. Lexicon-based sentiment models (such as VADER) offer interpretability and computational efficiency but often fail to capture context, sarcasm, and implicit expressions of stress (Hutto & Gilbert, 2014). In contrast, transformer-based deep learning models (such as RoBERTa and BERT) demonstrate superior accuracy in detecting nuanced emotional states but sacrifice interpretability and require greater computational resources (Liu et al., 2019; Devlin et al., 2019). To date, few studies have systematically compared these approaches or explored hybrid methods that balance accuracy with explainability (A novel hybrid model, 2025).
 
-Third, there is limited integration of NLP-derived sentiment signals with rigorous statistical forecasting approaches. Existing research treats sentiment as isolated findings rather than as input for predictive models. When NLP and forecasting have been combined, the methodological rigor often diminishes, particularly regarding the handling of count-based data exhibiting overdispersion and temporal autocorrelation. This gap is consequential: without predictive integration, sentiment analysis remains descriptive rather than actionable, providing historical insights but no forward-looking capability for intervention planning.
+Third, there is limited integration of NLP-derived sentiment signals with rigorous statistical forecasting approaches. Existing research treats sentiment as isolated findings rather than as input for predictive models (Natural language processing, 2022). When NLP and forecasting have been combined, the methodological rigor often diminishes, particularly regarding the handling of count-based data exhibiting overdispersion and temporal autocorrelation. This gap is consequential: without predictive integration, sentiment analysis remains descriptive rather than actionable, providing historical insights but no forward-looking capability for intervention planning (Depression detection, 2021).
 
 ### 1.3 Research Objective and Specific Objectives
 
-This research proposal outlines a systematic framework that integrates NLP-based sentiment analysis with statistical time-series forecasting to examine temporal patterns in student emotional expression on social media and identify periods of heightened psychological demand. The overarching goal is to develop and validate a proactive, data-driven system capable of predicting stress surges among students without relying on institution-specific academic calendars, thereby enabling timely mental health interventions.
+This research proposal outlines a systematic framework that integrates NLP-based sentiment analysis with statistical time-series forecasting to examine temporal patterns in student emotional expression on social media and identify periods of heightened psychological demand (Analyzing student mental health, 2025). The overarching goal is to develop and validate a proactive, data-driven system capable of predicting stress surges among students without relying on institution-specific academic calendars, thereby enabling timely mental health interventions.
 
 To achieve this primary objective, the research will pursue three specific sub-objectives:
 
@@ -58,13 +58,13 @@ This literature review synthesizes research at the intersection of Natural Langu
 
 #### 2.1.1 NLP for Mental Health Detection in Online Communities
 
-Natural Language Processing has emerged as a pivotal tool for analyzing textual data to identify mental health indicators. Social media platforms including Reddit provide abundant, publicly accessible data reflecting users' emotional states and behavioral patterns. Unlike traditional institutional surveys limited by low response rates and reporting bias, NLP techniques enable quantification of stress and anxiety by analyzing linguistic cues embedded in user-generated content, offering near real-time insights into psychological trends. This capability is particularly valuable for student mental health monitoring, as Reddit communities provide continuous documentation of academic stress without relying on self-reporting mechanisms.
+Natural Language Processing has emerged as a pivotal tool for analyzing textual data to identify mental health indicators (Natural language processing, 2022). Social media platforms including Reddit provide abundant, publicly accessible data reflecting users' emotional states and behavioral patterns (Gliniecka, 2023). Unlike traditional institutional surveys limited by low response rates and reporting bias, NLP techniques enable quantification of stress and anxiety by analyzing linguistic cues embedded in user-generated content, offering near real-time insights into psychological trends (Coppersmith et al., 2014). This capability is particularly valuable for student mental health monitoring, as Reddit communities provide continuous documentation of academic stress without relying on self-reporting mechanisms (Exploring Reddit conversations, 2022).
 
 #### 2.1.2 Lexicon-Based vs. Transformer-Based Approaches
 
-Two primary NLP paradigms currently dominate sentiment analysis research. Lexicon-based models such as VADER (Valence Aware Dictionary and Sentiment Reasoner) rely on predefined dictionaries associating words with sentiment scores. These approaches offer interpretability and computational efficiency, making them suitable for large-scale datasets. However, lexicon-based methods demonstrate critical limitations: they struggle with context, fail to recognize sarcasm, and miss implicit expressions of stress. For example, statements like "I can't even" may indicate high stress but appear neutral to lexicon-based systems.
+Two primary NLP paradigms currently dominate sentiment analysis research. Lexicon-based models such as VADER (Valence Aware Dictionary and Sentiment Reasoner) rely on predefined dictionaries associating words with sentiment scores (Hutto & Gilbert, 2014). These approaches offer interpretability and computational efficiency, making them suitable for large-scale datasets. However, lexicon-based methods demonstrate critical limitations: they struggle with context, fail to recognize sarcasm, and miss implicit expressions of stress (Improving sentiment classification, 2023). For example, statements like "I can't even" may indicate high stress but appear neutral to lexicon-based systems.
 
-In contrast, transformer-based deep learning models such as BERT and RoBERTa leverage contextual embeddings to detect complex emotional patterns, demonstrating superior accuracy in identifying nuanced psychological states common in academic discourse. These models excel at capturing implicit expressions and contextual nuance. However, they sacrifice interpretability and require substantially greater computational resources, creating practical deployment challenges.
+In contrast, transformer-based deep learning models such as BERT and RoBERTa leverage contextual embeddings to detect complex emotional patterns, demonstrating superior accuracy in identifying nuanced psychological states common in academic discourse (Devlin et al., 2019; Liu et al., 2019). These models excel at capturing implicit expressions and contextual nuance (A deep learning-based model, 2022). However, they sacrifice interpretability and require substantially greater computational resources, creating practical deployment challenges (Sentiment analysis classification, 2023).
 
 #### 2.1.3 Temporal and Count-Based Limitations
 
@@ -74,9 +74,9 @@ Despite methodological advances, sentiment analysis in current literature remain
 
 #### 2.2.1 Poisson and Negative Binomial Regression
 
-After NLP classification, researchers commonly aggregate stress mentions into count data representing high-stress mentions per defined time period (day, week). Count data are discrete and non-negative, naturally suited to specialized regression approaches. Poisson regression assumes mean-variance equality, suitable for well-behaved datasets but unrealistic for social media signals, which tend to be sparse and irregular.
+After NLP classification, researchers commonly aggregate stress mentions into count data representing high-stress mentions per defined time period (day, week) (Cameron & Trivedi, 2013). Count data are discrete and non-negative, naturally suited to specialized regression approaches (A multivariate Poisson regression, 2021). Poisson regression assumes mean-variance equality, suitable for well-behaved datasets but unrealistic for social media signals, which tend to be sparse and irregular.
 
-Negative Binomial regression accommodates overdispersion, where variance exceeds the mean, commonly observed in Reddit data. Specifically, Reddit stress mentions exhibit minimal activity on typical days but sharp spikes around predictable academic events such as midterms and final examinations. This pattern of sparsity with episodic bursts makes Negative Binomial regression particularly appropriate for modeling student mental health signals from social media.
+Negative Binomial regression accommodates overdispersion, where variance exceeds the mean, commonly observed in Reddit data (Using the negative binomial, 2011). Specifically, Reddit stress mentions exhibit minimal activity on typical days but sharp spikes around predictable academic events such as midterms and final examinations. This pattern of sparsity with episodic bursts makes Negative Binomial regression particularly appropriate for modeling student mental health signals from social media (An empirical approach, 2018).
 
 #### 2.2.2 Temporal Autocorrelation in Count Data
 
@@ -159,7 +159,7 @@ The inclusion criteria prioritize relevance to student mental health and academi
 
 Rather than relying exclusively on either lexicon-based or transformer-based methods, this research employs a hybrid approach combining both paradigms. This design directly addresses the methodological gap identified in the literature review: balancing accuracy with interpretability.
 
-The hybrid approach operates as follows: each post will be classified independently by both VADER (lexicon-based) and RoBERTa (transformer-based) models. Posts receiving concordant classifications (both models predicting the same sentiment direction) are classified with high confidence. Posts receiving discordant classifications are subjected to secondary analysis examining linguistic patterns and contextual factors to determine the most appropriate classification. This design preserves VADER's interpretability advantage—researchers can understand why specific linguistic features drove classifications—while leveraging RoBERTa's superior accuracy on implicit expressions and contextual nuance.
+The hybrid approach operates as follows: each post will be classified independently by both VADER (lexicon-based) and RoBERTa (transformer-based) models (Sentiment analysis classification, 2023). Posts receiving concordant classifications (both models predicting the same sentiment direction) are classified with high confidence. Posts receiving discordant classifications are subjected to secondary analysis examining linguistic patterns and contextual factors to determine the most appropriate classification (Privacy-enhanced sentiment, 2024). This design preserves VADER's interpretability advantage—researchers can understand why specific linguistic features drove classifications—while leveraging RoBERTa's superior accuracy on implicit expressions and contextual nuance (Improving sentiment classification, 2023).
 
 #### 3.3.2 VADER Implementation
 
@@ -183,7 +183,7 @@ To ensure consistency and reliability, the principal investigator will: (1) crea
 
 #### 3.4.1 Temporal Aggregation
 
-Following NLP classification, stress-indicative posts will be aggregated at the daily level, creating a time series of daily stress mention counts. Aggregation at the daily level balances temporal granularity with sufficient sample sizes and the natural rhythm of academic activities (classes, exams, assignment deadlines typically follow daily or weekly cycles).
+Following NLP classification, stress-indicative posts will be aggregated at the daily level, creating a time series of daily stress mention counts (Social media sentiment, 2024). Aggregation at the daily level balances temporal granularity with sufficient sample sizes and the natural rhythm of academic activities (classes, exams, assignment deadlines typically follow daily or weekly cycles) (Academic stress, 2021).
 
 For each day t within the 16-week observation period, a count variable Y_t will be computed representing the number of stress-indicative posts on that day, aggregated across all monitored subreddits. This creates a time series of 112 daily observations.
 
@@ -227,11 +227,11 @@ Statistical significance will be assessed using Wald tests with α = 0.05. Coeff
 
 #### 3.6.1 Prophet Framework Implementation
 
-Following identification of significant predictors through count regression, time-series forecasting will employ the Prophet framework, developed by Facebook for business forecasting applications. Prophet decomposes time series into trend, seasonality, and holiday/event effects:
+Following identification of significant predictors through count regression, time-series forecasting will employ the Prophet framework, developed by Facebook for business forecasting applications (Taylor & Letham, 2018). Prophet decomposes time series into trend, seasonality, and holiday/event effects (The structure of psychopathology, 2026):
 
 Y_t = Trend_t + Seasonality_t + Event_t + ε_t
 
-Where Trend_t captures long-term direction (typically linear or piecewise linear in academic contexts); Seasonality_t captures recurring weekly and semester-level patterns; Event_t models the effects of known events (midterms, finals, semester start/end); and ε_t represents residual noise.
+Where Trend_t captures long-term direction (typically linear or piecewise linear in academic contexts); Seasonality_t captures recurring weekly and semester-level patterns; Event_t models the effects of known events (midterms, finals, semester start/end); and ε_t represents residual noise (Mental health-aware sentiment, 2026).
 
 Exam dates and semester milestones identified during data exploration will be specified as events, allowing Prophet to quantify their effects on expected stress counts and adjust forecasts accordingly. This is particularly valuable because exam dates may shift slightly year-to-year; Prophet learns the magnitude of impact independently of specific calendar dates.
 
@@ -277,7 +277,7 @@ Primary forecasts will generate predictions for 2-4 weeks ahead of the training 
 
 #### 3.8.1 Data Privacy and Anonymity
 
-Reddit data are publicly available and do not require explicit informed consent; however, ethical principles demand careful stewardship. All data collection, processing, and analysis will adhere to Reddit's terms of service and research ethics guidelines. Specific safeguards include: (1) no direct identification of individual users; all analyses operate on aggregated counts, not individual-level data; (2) subreddit-level analysis rather than individual post-level reporting, protecting individual privacy; and (3) compliance with data protection regulations (GDPR where applicable) ensuring research data are stored securely with restricted access.
+Reddit data are publicly available and do not require explicit informed consent; however, ethical principles demand careful stewardship (Gillespie, 2024). All data collection, processing, and analysis will adhere to Reddit's terms of service and research ethics guidelines (A survey on privacy, 2019). Specific safeguards include: (1) no direct identification of individual users; all analyses operate on aggregated counts, not individual-level data; (2) subreddit-level analysis rather than individual post-level reporting, protecting individual privacy; and (3) compliance with data protection regulations (GDPR where applicable) ensuring research data are stored securely with restricted access (Osatuyi, 2013).
 
 #### 3.8.2 Appropriate Use and Potential Harms
 
@@ -292,3 +292,170 @@ The hybrid NLP approach explicitly prioritizes explainability: VADER classificat
 #### 3.8.4 Acknowledgment of Limitations and Responsible Framing
 
 Findings will be accompanied by clear discussion of limitations: the inability to diagnose clinical mental health conditions, the potential for Reddit-specific biases, and the preliminary nature of predictions. Recommendations will be framed as "supportive intelligence" for resource planning rather than definitive predictive instruments for clinical decision-making.
+
+---
+
+## 4. Work Plan and Timeline
+
+This section outlines the implementation timeline, milestones, resource requirements, and risk management strategies for executing the proposed capstone research during the March-April 2026 project execution period. The project is structured into five integrated phases spanning eight weeks, designed to progress systematically from data processing through final analysis and report completion.
+
+### 4.1 Project Phases and Timeline Overview
+
+**Phase 1: NLP Implementation and Classification (Weeks 1-3, March 1-21)**
+
+The initial phase focuses on finalizing and executing the hybrid NLP pipeline. During week 1, the principal investigator will configure VADER and RoBERTa models using pre-trained weights and establish classification thresholds. Week 2 involves conducting preliminary testing on sample posts to validate threshold selection and troubleshoot any technical issues. Week 3 completes the full dataset classification, applying both VADER and RoBERTa to all collected Reddit posts, generating two independent classification outputs for comparison.
+
+**Phase 2: Manual Review and Validation (Weeks 3-4, March 18-29)**
+
+Overlapping with phase 1's conclusion, weeks 3-4 focus on reconciling discordant classifications. The principal investigator will manually review and classify approximately 15-20% of posts where VADER and RoBERTa disagree, applying explicit decision rules. This phase includes establishing the detailed coding manual before review begins. By week 4, all classifications will be finalized with intra-rater reliability assessment underway (recoding 10% of posts to achieve ≥85% agreement target).
+
+**Phase 3: Statistical Analysis and Count Modeling (Weeks 5-6, March 30-April 12)**
+
+Week 5 focuses on count data aggregation, computing daily stress mention counts and generating descriptive statistics. Temporal visualization, ACF/PACF analysis, and variance-to-mean assessment will be completed to evaluate data properties. Week 6 focuses on fitting competing count regression models (Poisson and Negative Binomial GLMs), conducting model comparison via AIC/BIC criteria, and interpreting significant predictors through incidence rate ratios.
+
+**Phase 4: Time-Series Forecasting and Results (Weeks 7-8, April 13-26)**
+
+Week 7 focuses on rapid implementation of the primary forecasting approach (Prophet), selected based on preliminary model assessment. ARIMA will be implemented as a comparative baseline. Week 8 completes model evaluation using hold-out test data and synthesizes all results. The principal investigator will prepare key visualizations (time series plots, model comparison charts, forecast plots with confidence intervals) and integrate findings into the capstone project report with discussion of limitations and implications.
+
+### 4.2 Project Timeline Visualization
+
+```mermaid
+gantt
+    title Capstone Project 2: Research Execution Timeline (March-April 2026, 8 Weeks)
+    dateFormat YYYY-MM-DD
+
+    section Phase 1: NLP
+    VADER & RoBERTa Setup :nlp1, 2026-03-01, 7d
+    Classification Testing :nlp2, 2026-03-08, 7d
+    Full Dataset Classification :nlp3, 2026-03-15, 7d
+
+    section Phase 2: Validation
+    Manual Review & Coding Manual :val1, 2026-03-18, 10d
+    Intra-Rater Reliability Check :val2, 2026-03-25, 5d
+
+    section Phase 3: Statistics
+    Count Aggregation & EDA :stat1, 2026-03-30, 7d
+    Count Regression Modeling :stat2, 2026-04-06, 7d
+
+    section Phase 4: Forecasting & Results
+    Prophet & ARIMA Implementation :fc1, 2026-04-13, 7d
+    Model Evaluation & Report Synthesis :fc2, 2026-04-20, 7d
+```
+
+### 4.3 Resource Requirements
+
+The project requires minimal technical and human resources, reflecting its nature as a solo capstone research project. The following table summarizes key resource requirements across technical, human, and timeline management dimensions:
+
+| Resource Category | Specification | Purpose |
+|---|---|---|
+| **Python Libraries** | Pandas, scikit-learn, PyTorch, Prophet, Statsmodels | Data manipulation, machine learning, deep learning, time-series forecasting, statistical modeling |
+| **Data Storage** | Encrypted local drive or secure cloud repository | Secure storage and protection of Reddit data |
+| **Computational Resources** | CPU-based processing (GPU optional) | Model training for NLP classification and regression; GPU beneficial but not required for LSTM |
+| **Version Control** | Git repository | Code documentation, reproducibility, version management |
+| **Human Resources** | Principal investigator: 25-30 hours/week for 8 weeks (200-240 total hours) | Solo capstone execution; no external collaborators, peer reviewers, or research assistants |
+| **Timeline Management** | Buffer days between phases; weekly checkpoints | Accommodation of unexpected delays; progress assessment and schedule adjustment |
+
+The modest resource requirements are suitable for a solo capstone project. The principal investigator maintains flexibility through overlapping phases and buffer periods between major milestones, ensuring the project remains on track despite inevitable challenges. Weekly progress checkpoints enable real-time problem-solving without cascading delays into subsequent phases.
+
+### 4.4 Risk Management and Mitigation
+
+Multiple risks could impact project success, each with defined mitigation strategies. NLP classification quality represents a primary risk, as misclassifications could undermine subsequent analyses. This risk is mitigated through the hybrid NLP approach combining VADER and RoBERTa, which captures classification uncertainty and reduces single-method errors. Additionally, intra-rater reliability assessment through recoding 10% of the dataset ensures manual classifications maintain consistency, and sensitivity analysis using alternative classification thresholds demonstrates robustness of findings to threshold choices.
+
+Model overfitting poses a secondary risk, particularly with complex deep learning approaches like LSTM. This is addressed through systematic model comparison on hold-out test data that the models have never seen during training, preventing overconfidence in models that merely memorize training patterns. Similarly, timeline slippage could delay completion if any phase encounters unexpected obstacles. The project mitigates this through overlapping phases (e.g., manual review beginning during final classification), which provides schedule flexibility. Simplified fallback analyses are prepared in advance; if time becomes constrained, the project can focus on NLP comparison and statistical modeling, with time-series forecasting as a secondary objective.
+
+Technical issues during implementation could disrupt progress. Early testing during weeks 1-2 identifies problems before full-scale implementation, preventing cascading failures. Version control with Git ensures all code is documented and reproducible, allowing the principal investigator to revert to previous versions if technical issues arise. Finally, if critical delays occur affecting overall timeline, the project can be streamlined by prioritizing Prophet forecasting over more complex LSTM approaches, using automated model selection instead of manual comparison, and emphasizing the most novel contributions (NLP comparison and integration with statistical modeling) while positioning forecasting as supporting analysis.
+
+---
+
+## Conclusion
+
+This research proposal presents a feasible and methodologically rigorous capstone project that directly addresses a significant gap in student mental health monitoring (Addressing mental health, 2024). By integrating hybrid NLP approaches with count-based statistical modeling and time-series forecasting, the research creates a novel framework that transforms sentiment analysis from descriptive to predictive, enabling proactive intervention planning (Mental health in digital, 2025). The eight-week execution timeline is realistic and flexible, with clearly defined phases, manageable resource requirements, and robust risk mitigation strategies. The project's emphasis on methodological integration, ethical considerations, and practical applicability positions it to make meaningful contributions to both data science and higher education (Hochreiter & Schmidhuber, 1997), while providing a comprehensive proof-of-concept for monitoring student well-being through online discourse (Lindén & Mäntyniemi, 2011).
+
+---
+
+## References
+
+Academic stress and mental well-being in college students. (2021). *PMC*, PMC9169886. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9169886/
+
+Addressing mental health in university students: A call for action. (2024). *PMC*, PMC12213389. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12213389/
+
+Analyzing student mental health with RoBERTa-Large: A sentiment analysis and data analytics approach. (2025). *Frontiers in Big Data*, 8, Article 1615788. https://www.frontiersin.org/journals/big-data/articles/10.3389/fdata.2025.1615788/full
+
+A novel hybrid model for emotion detection in text through sequential and transformer-based approaches: LSTM enhanced RoBERTa (LER). (2025). *Scientific Reports*, 15, Article 31984. https://www.nature.com/articles/s41598-025-31984-1
+
+An empirical approach to determine a threshold for assessing overdispersion in Poisson and negative binomial models for count data. (2018). *PMC*, PMC6290908. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6290908/
+
+A survey on privacy in social media: Identification, mitigation, and applications. (2019). *ACM Transactions on Data Science*, 1(1), Article 3. https://doi.org/10.1145/3343038
+
+A multivariate Poisson regression model for count data. (2021). *PMC*, PMC9041711. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9041711/
+
+A deep learning-based model using hybrid feature extraction approach for consumer sentiment analysis. (2022). *Journal of Big Data*, 9, Article 63. https://doi.org/10.1186/s40537-022-00680-6
+
+Box, G. E., Jenkins, G. M., Reinsel, G. C., & Ljung, G. M. (2015). *Time series analysis: Forecasting and control* (5th ed.). John Wiley & Sons.
+
+Cameron, A. C., & Trivedi, P. K. (2013). *Regression analysis of count data* (2nd ed.). Cambridge University Press.
+
+Coppersmith, G., Dredze, M., & Harman, C. (2014). Quantifying mental health signals in Twitter. In *Proceedings of the Workshop on Computational Linguistics and Clinical Psychology*, 51–60. https://aclanthology.org/W14-3207/
+
+Coppersmith, G., Dredze, M., Harman, C., Hollingshead, K., & Mitchell, M. (2015). CLPsych 2015 shared task: Depression and PTSD on Twitter. In *Proceedings of the 2nd Workshop on Computational Linguistics and Clinical Psychology: From Language to Well-being*. https://aclanthology.org/W15-1204/
+
+Depression detection from social media text analysis using natural language processing techniques and hybrid deep learning model. (2021). *ACM Transactions on Asian and Low-Resource Language Information Processing*, 20(6), Article 89. https://dl.acm.org/doi/full/10.1145/3569580
+
+Devlin, J., Chang, M. W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of deep bidirectional transformers for language understanding. In *Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies*, 1, 4171–4186. https://aclanthology.org/N19-1423/
+
+Digital tools to support post-secondary student mental health and wellbeing. (2024). *PMC*, PMC12504010. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12504010/
+
+Early detection of mental health crises through artificial-intelligence-powered social media analysis: A prospective observational study. (2024). *PMC*, PMC11433454. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11433454/
+
+Examining the effects of academic stress on student well-being in higher education. (2025). *Humanities and Social Sciences Communications*, 12, Article number. https://www.nature.com/articles/s41599-025-04698-y
+
+Exploring Reddit conversations about mental health difficulties among college students during the COVID-19 pandemic. (2022). *PMC*, PMC9950288. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9950288/
+
+Generalized performance of LSTM in time-series forecasting. (2024). *Applied Artificial Intelligence*, 38(1), 2377510. https://www.tandfonline.com/doi/full/10.1080/08839514.2024.2377510
+
+Gillespie, T. (2024). Remember the human: A systematic review of ethical considerations in Reddit research. *Proceedings of the ACM on Human-Computer Interaction*, 8. https://doi.org/10.1145/3633070
+
+Gliniecka, M. (2023). The ethics of publicly available data research: A situated ethics framework for Reddit. *Social Media + Society*, 9(3), 20563051231192021. https://journals.sagepub.com/doi/10.1177/20563051231192021
+
+Guntuku, S. C., Narayanan, S., & Minot, M. (2017). Detecting depression and mental illness on social media: An integrative review. *Current Opinion in Behavioral Sciences*, 18, 43–49. https://www.sciencedirect.com/science/article/abs/pii/S2352154617300384
+
+Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. *Neural Computation*, 9(8), 1735–1780. https://doi.org/10.1162/neco.1997.9.8.1735
+
+Hutto, C. J., & Gilbert, E. E. (2014). VADER: A parsimonious rule-based model for sentiment analysis of social media text. In *Proceedings of the International AAAI Conference on Web and Social Media*, 8(1), 216–225. https://ojs.aaai.org/index.php/ICWSM/article/view/14550
+
+Improving sentiment classification using a RoBERTa-based hybrid model. (2023). *Frontiers in Human Neuroscience*, 17, 1292010. https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2023.1292010/full
+
+Kessler, R. C., Chiu, W. T., Demler, O., Merikangas, K. R., & Walters, E. E. (2005). Prevalence, severity, and comorbidity of 12-month DSM-IV disorders in the National Comorbidity Survey Replication. *Archives of General Psychiatry*, 62(6), 617–627. https://doi.org/10.1001/archpsyc.62.6.617
+
+Lindén, A., & Mäntyniemi, S. (2011). Using the negative binomial distribution to model overdispersion in ecological count data. *Ecology*, 92(7), 1566–1575. https://esajournals.onlinelibrary.wiley.com/doi/full/10.1890/10-1831.1
+
+Liu, Y., Ott, M., Goyal, N., Du, J., Joshi, M., Chen, D., ... & Stoyanov, V. (2019). RoBERTa: A robustly optimized BERT pretraining approach. *arXiv preprint arXiv:1907.11692*. https://arxiv.org/abs/1907.11692
+
+Massanari, T. L., & Proferes, N. J. (2020). Studying Reddit: A systematic overview of disciplines, approaches, methods, and ethics. *Social Media + Society*, 6(3), 2056305120946725. https://journals.sagepub.com/doi/pdf/10.1177/20563051211019004
+
+Mental health analysis in social media posts: A survey. (2022). *Archives of Computational Methods in Engineering*, 29, 3479–3509. https://link.springer.com/article/10.1007/s11831-022-09863-z
+
+Mental health in digital microsystems across three Asian Reddit communities. (2025). *Scientific Reports*, 15, Article 30760. https://doi.org/10.1038/s41598-025-30760-5
+
+Mental health-aware sentiment analysis using a hybrid quantum–classical approach. (2026). *The Journal of Supercomputing*, 82, 8281–8303. https://doi.org/10.1007/s11227-026-08281-3
+
+Morini, V., Sansoni, M., Rossetti, G., Pedreschi, D., & Castillo, C. (2024). Participant behavior and community response in online mental health communities: Insights from Reddit. *ScienceDirect*, preprint. https://www.sciencedirect.com/science/article/pii/S0747563224004126
+
+Natural language processing applied to mental illness detection: A narrative review. (2022). *npj Digital Medicine*, 5, Article 75. https://doi.org/10.1038/s41746-022-00589-7
+
+Osatuyi, B. (2013). Social media and internet addiction: Reflections on identities, cultures, and values in the global south. *Information Development*, 29(2), 130–141.
+
+Privacy-enhanced sentiment analysis in mental health: Federated learning with data obfuscation and bidirectional encoder representations from transformers. (2024). *Electronics*, 13(23), Article 4650. https://doi.org/10.3390/electronics13234650
+
+Screening for depression using natural language processing: Literature review. (2024). *PMC*, PMC11574504. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11574504/
+
+Sentiment analysis classification system using hybrid BERT models. (2023). *Journal of Big Data*, 10, Article 80. https://doi.org/10.1186/s40537-023-00781-w
+
+Social media sentiment analysis and mental health prediction using deep belief network (DBN). (2024). *IEEE Xplore*, Article 10699157. https://ieeexplore.ieee.org/document/10699157/
+
+The structure of psychopathology on Reddit: Network analysis of mental health communities in relation to the ICD diagnostic system. (2026). *Journal of Medical Internet Research*, 1, Article e80958. https://www.jmir.org/2026/1/e80958
+
+Taylor, S. J., & Letham, B. (2018). Forecasting at scale. *The American Statistician*, 72(1), 37–45. https://doi.org/10.1080/00031305.2017.1380080
+
+Unlocking the power of LSTM for long term time series forecasting. (2024). *arXiv preprint arXiv:2408.10006*. https://arxiv.org/abs/2408.10006
+
