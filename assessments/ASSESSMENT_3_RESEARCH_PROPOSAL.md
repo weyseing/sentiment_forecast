@@ -392,7 +392,7 @@ gantt
     Prophet/ARIMA/LSTM Implementation :fc1, 2026-04-07, 9d
     Model Evaluation & Report Synthesis :fc2, 2026-04-07, 9d
 
-    milestone Capstone Deadline, 2026-04-15, 0d
+    Capstone Deadline :cap, milestone, 2026-04-15, 0d
 ```
 
 **Figure 4.1.** Project Timeline (March–April 2026, Due Tuesday April 15)
