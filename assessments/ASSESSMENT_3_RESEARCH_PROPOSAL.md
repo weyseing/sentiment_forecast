@@ -378,19 +378,19 @@ gantt
     dateFormat YYYY-MM-DD
 
     section Phase 1: NLP
-    VADER & RoBERTa Setup :nlp1, 2026-03-01, 7d
+    VADER and RoBERTa Setup :nlp1, 2026-03-01, 7d
     Full Dataset Classification :nlp2, 2026-03-08, 7d
 
     section Phase 2: Validation
-    Manual Review & Coding Manual :val1, 2026-03-14, 10d
+    Manual Review and Coding Manual :val1, 2026-03-14, 10d
     Intra-Rater Reliability Check :val2, 2026-03-21, 5d
 
     section Phase 3: Statistics
-    Count Aggregation & Regression :stat1, 2026-03-27, 11d
+    Count Aggregation and Regression :stat1, 2026-03-27, 11d
 
     section Phase 4: Forecasting
-    Prophet/ARIMA/LSTM Implementation :fc1, 2026-04-07, 9d
-    Model Evaluation & Report Synthesis :fc2, 2026-04-07, 9d
+    Prophet ARIMA LSTM Implementation :fc1, 2026-04-07, 5d
+    Model Evaluation and Report :fc2, 2026-04-11, 4d
 
     Capstone Deadline :cap, milestone, 2026-04-15, 0d
 ```
