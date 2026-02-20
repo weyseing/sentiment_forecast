@@ -374,25 +374,15 @@ Weeks 4-6 focus on rapid implementation of Prophet, ARIMA, and LSTM forecasting 
 
 ```mermaid
 gantt
-    title Capstone Project 2: Research Execution Timeline (March-April 2026, 6 Weeks)
-    dateFormat YYYY-MM-DD
-
-    section Phase 1: NLP
-    VADER and RoBERTa Setup :nlp1, 2026-03-01, 7d
-    Full Dataset Classification :nlp2, 2026-03-08, 7d
-
-    section Phase 2: Validation
-    Manual Review and Coding Manual :val1, 2026-03-14, 10d
-    Intra-Rater Reliability Check :val2, 2026-03-21, 5d
-
-    section Phase 3: Statistics
-    Count Aggregation and Regression :stat1, 2026-03-27, 11d
-
-    section Phase 4: Forecasting
-    Prophet ARIMA LSTM Implementation :fc1, 2026-04-07, 5d
-    Model Evaluation and Report :fc2, 2026-04-11, 4d
-
-    Capstone Deadline :cap, milestone, 2026-04-15, 0d
+    title Capstone Project Timeline March-April 2026
+    VADER RoBERTa Setup :nlp1, 2026-03-01, 7d
+    Dataset Classification :nlp2, 2026-03-08, 7d
+    Manual Review :val1, 2026-03-14, 10d
+    Reliability Check :val2, 2026-03-21, 5d
+    Count Analysis :stat1, 2026-03-27, 11d
+    Forecasting Setup :fc1, 2026-04-07, 5d
+    Model Evaluation :fc2, 2026-04-11, 4d
+    Deadline :crit, 2026-04-15, 1d
 ```
 
 **Figure 4.1.** Project Timeline (March–April 2026, Due Tuesday April 15)
