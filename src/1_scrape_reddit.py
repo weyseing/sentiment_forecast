@@ -7,7 +7,7 @@ Target subreddits : r/college, r/students, r/mentalhealth, r/GradSchool,
                     r/AskAcademia, r/learnprogramming, r/premed, r/lawschool,
                     r/nursing, r/EngineeringStudents
 Default window    : 16-week academic semester (configurable)
-Output            : /app/data/reddit_raw.csv  (appended page-by-page, safe to interrupt)
+Output            : /app/data/1_reddit_raw.csv  (appended page-by-page, safe to interrupt)
 
 Note: r/mentalhealth requires an additional student-context keyword match to
       ensure posts are from/about university students, not general population.
@@ -67,7 +67,7 @@ BASE_URL   = "https://arctic-shift.photon-reddit.com/api"
 LIMIT      = 100   # per request (max 1000)
 SLEEP_SEC  = 1.0   # polite delay between requests
 OUTPUT_DIR = "/app/data"
-OUTPUT_FILE = os.path.join(OUTPUT_DIR, "reddit_raw.csv")
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, "1_reddit_raw.csv")
 
 
 # ---------------------------------------------------------------------------

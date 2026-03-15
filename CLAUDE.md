@@ -18,13 +18,14 @@ Predict when university students will be most stressed, using Reddit posts as da
 
 ### Step 1: Collect Data (Reddit Scraper)
 - Grab posts & comments from Reddit via **Arctic Shift API** (free, no API key, historical archive)
-- **Subreddits:** r/college, r/students, r/mentalhealth
+- **Subreddits:** r/college, r/students, r/GradSchool, r/AskAcademia, r/learnprogramming, r/premed, r/lawschool, r/nursing, r/EngineeringStudents, r/mentalhealth (student-context filtered)
 - **Duration:** 16 weeks (one full academic semester = 112 days), default Fall 2025: Sep 1 → Dec 21
 - **Two-stage filtering:**
-  - Stage 1 (scraper): broad keyword filter (30 stress keywords) to narrow ~50k posts → ~10-15k candidates
+  - Stage 1 (scraper): broad keyword filter (stress keywords); r/mentalhealth also requires a student-context keyword match (e.g. "exam", "semester", "campus") to avoid general-population noise
   - Stage 2 (NLP, next step): VADER + RoBERTa to confirm which candidates are genuinely stress-related
 - Appends to CSV page-by-page — safe to interrupt and resume
 - **Output:** `data/reddit_raw.csv` — one row per post/comment, with text + timestamp
+- **Prior scrape:** `data/reddit_raw_1.csv` — original scrape (college/students/mentalhealth only, 35k rows, Fall 2025)
 
 ---
 
@@ -122,13 +123,16 @@ Reddit Posts
 
 | File | Purpose |
 |------|---------|
-| `src/scrape_reddit.py` | Reddit data collection via Arctic Shift API (no API key needed) |
+| `src/1_scrape_reddit.py` | Reddit data collection via Arctic Shift API (no API key needed) |
+| `src/2_classify_sentiment.py` | VADER + RoBERTa hybrid classification → `is_stressed` label |
 
 ## Data
 
 | File | Description |
 |------|-------------|
-| `data/reddit_raw.csv` | Raw scraped posts/comments (keyword-filtered candidates) |
+| `data/1_reddit_raw.csv` | Output of Step 1 — raw scraped posts/comments (keyword-filtered) |
+| `data/1_reddit_raw_1.csv` | Prior scrape backup (college/students/mentalhealth only, 35k rows, Fall 2025) |
+| `data/2_reddit_labeled.csv` | Output of Step 2 — adds `vader_label`, `roberta_label`, `is_stressed`, `needs_review` |
 
 ## Assessments
 
