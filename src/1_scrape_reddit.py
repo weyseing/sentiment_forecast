@@ -13,6 +13,7 @@ Note: r/mentalhealth requires an additional student-context keyword match to
       ensure posts are from/about university students, not general population.
 """
 
+import argparse
 import os
 import time
 import requests
@@ -237,6 +238,19 @@ def scrape(endpoint: str, record_type: str, subreddit: str,
 # ---------------------------------------------------------------------------
 
 def main():
+    parser = argparse.ArgumentParser(description="Reddit stress scraper")
+    parser.add_argument(
+        "--subreddit", "-s",
+        nargs="+",
+        metavar="SUB",
+        help="Only scrape these subreddit(s), e.g. --subreddit nursing EngineeringStudents",
+    )
+    args = parser.parse_args()
+
+    subreddits = args.subreddit if args.subreddit else TARGET_SUBREDDITS
+    # Preserve original order and validate names
+    subreddits = [s for s in TARGET_SUBREDDITS if s in subreddits] or subreddits
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     # Load already-saved IDs so we skip duplicates if resuming
@@ -246,7 +260,7 @@ def main():
     print("=" * 65)
     print(f"  Reddit Stress Scraper")
     print(f"  Window    : {SEMESTER_START} → {SEMESTER_END}")
-    print(f"  Subreddits: {TARGET_SUBREDDITS}")
+    print(f"  Subreddits: {subreddits}")
     print(f"  Student-ctx filter: {STUDENT_CONTEXT_FILTER_SUBREDDITS}")
     print(f"  Comments  : {'yes' if SCRAPE_COMMENTS else 'no'}")
     print(f"  Output    : {OUTPUT_FILE}")
@@ -255,7 +269,7 @@ def main():
 
     total_counter = [resume_count]  # mutable so scrape() can update it
 
-    for sub in TARGET_SUBREDDITS:
+    for sub in subreddits:
         try:
             student_ctx = sub in STUDENT_CONTEXT_FILTER_SUBREDDITS
             scrape("posts/search",    "post",    sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter, student_ctx)
