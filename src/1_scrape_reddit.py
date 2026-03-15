@@ -247,9 +247,13 @@ def main():
     )
     args = parser.parse_args()
 
-    subreddits = args.subreddit if args.subreddit else TARGET_SUBREDDITS
-    # Preserve original order and validate names
-    subreddits = [s for s in TARGET_SUBREDDITS if s in subreddits] or subreddits
+    if args.subreddit:
+        unknown = [s for s in args.subreddit if s not in TARGET_SUBREDDITS]
+        if unknown:
+            parser.error(f"Unknown subreddit(s): {unknown}. Choose from: {TARGET_SUBREDDITS}")
+        subreddits = [s for s in TARGET_SUBREDDITS if s in args.subreddit]
+    else:
+        subreddits = TARGET_SUBREDDITS
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
