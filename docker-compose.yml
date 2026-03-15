@@ -1,0 +1,25 @@
+services:
+  sentiment_forecast:
+    build: .
+    container_name: sentiment_forecast
+    stdin_open: true   # keep STDIN open (-i)
+    tty: true          # allocate a pseudo-TTY (-t)
+
+    # Mount project directory so edits on your host reflect instantly
+    volumes:
+      - .:/app
+      - ./data:/app/data   # persist scraped CSV output
+
+    # All secrets injected from .env — never hardcode keys
+    env_file:
+      - .env
+
+    environment:
+      # Reddit API
+      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
+      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
+      - REDDIT_USER_AGENT=${REDDIT_USER_AGENT:-university_sentiment_scraper/1.0}
+      # Anthropic (for Claude Code CLI)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+    working_dir: /app
