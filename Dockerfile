@@ -1,7 +1,7 @@
-# Base: Python + Node.js (needed for Claude Code CLI)
+# Python + Node.js
 FROM python:3.12-slim
 
-# --- System dependencies ---
+# System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
@@ -9,24 +9,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# --- Install Node.js 22 (LTS) ---
+# Node.js 22
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# --- Install Claude Code CLI globally ---
+# Terminal colors
+ENV TERM=xterm-256color
+ENV COLORTERM=truecolor
+ENV CLICOLOR_FORCE=1
+
+# Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
-# --- Python dependencies ---
+# Python dependencies
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# --- Copy project files ---
+# Project files
 COPY . .
-
-# Create output data directory
 RUN mkdir -p data
 
-# Default: drop into an interactive shell so you can trigger scripts or claude manually
-CMD ["/bin/bash"]
+# Keep container alive
+CMD ["tail", "-f", "/dev/null"]
