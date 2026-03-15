@@ -3,9 +3,14 @@ Reddit Mental Health Sentiment Scraper
 Collects stress-related posts and comments from Reddit via Arctic Shift API
 (no API key required) for NLP sentiment analysis.
 
-Target subreddits : r/college, r/students, r/mentalhealth
+Target subreddits : r/college, r/students, r/mentalhealth, r/GradSchool,
+                    r/AskAcademia, r/learnprogramming, r/premed, r/lawschool,
+                    r/nursing, r/EngineeringStudents
 Default window    : 16-week academic semester (configurable)
-Output            : /apps/data/reddit_raw.csv  (appended page-by-page, safe to interrupt)
+Output            : /app/data/reddit_raw.csv  (appended page-by-page, safe to interrupt)
+
+Note: r/mentalhealth requires an additional student-context keyword match to
+      ensure posts are from/about university students, not general population.
 """
 
 import os
@@ -23,7 +28,19 @@ from datetime import datetime, timezone
 SEMESTER_START = "2025-09-01"
 SEMESTER_END   = "2025-12-21"
 
-TARGET_SUBREDDITS = ["college", "students", "mentalhealth"]
+TARGET_SUBREDDITS = [
+    # General student communities
+    "college", "students", "GradSchool", "AskAcademia",
+    # Discipline-specific student communities
+    "learnprogramming", "premed", "lawschool", "nursing", "EngineeringStudents",
+    # General mental health — filtered by STUDENT_CONTEXT_KEYWORDS
+    "mentalhealth",
+]
+
+# Subreddits that require an additional student-context keyword match.
+# Without this, r/mentalhealth pulls in general-population posts unrelated
+# to university stress, which skews the dataset (85% in prior scrape).
+STUDENT_CONTEXT_FILTER_SUBREDDITS = {"mentalhealth"}
 
 SCRAPE_COMMENTS = True  # set False to skip comments (much faster)
 
@@ -34,6 +51,16 @@ STRESS_KEYWORDS = [
     "struggling", "can't cope", "breakdown", "crying", "hopeless",
     "exam", "finals", "midterm", "deadline", "failing", "failed",
     "sleep deprived", "no motivation", "giving up", "drop out",
+]
+
+# Secondary filter applied only to STUDENT_CONTEXT_FILTER_SUBREDDITS.
+# Post must match at least one of these to confirm it is student/university-related.
+STUDENT_CONTEXT_KEYWORDS = [
+    "university", "college", "semester", "exam", "finals", "midterm",
+    "assignment", "professor", "lecture", "campus", "student", "grad school",
+    "undergraduate", "graduate", "thesis", "dissertation", "tuition",
+    "dorm", "roommate", "gpa", "course", "class", "degree", "major",
+    "internship", "academic", "school year",
 ]
 
 BASE_URL   = "https://arctic-shift.photon-reddit.com/api"
@@ -84,6 +111,11 @@ def append_to_csv(records: list[dict], existing_ids: set) -> int:
 def is_stress_related(text: str) -> bool:
     text_lower = text.lower()
     return any(kw in text_lower for kw in STRESS_KEYWORDS)
+
+
+def is_student_context(text: str) -> bool:
+    text_lower = text.lower()
+    return any(kw in text_lower for kw in STUDENT_CONTEXT_KEYWORDS)
 
 
 def fetch_page(endpoint: str, params: dict) -> list[dict]:
@@ -138,7 +170,8 @@ def fmt_record(raw: dict, record_type: str) -> dict:
 # ---------------------------------------------------------------------------
 
 def scrape(endpoint: str, record_type: str, subreddit: str,
-           after: str, before: str, existing_ids: set, total_counter: list):
+           after: str, before: str, existing_ids: set, total_counter: list,
+           require_student_context: bool = False):
     """
     Generic paginator for posts or comments.
     Appends each page to CSV immediately — safe to interrupt at any time.
@@ -172,6 +205,8 @@ def scrape(endpoint: str, record_type: str, subreddit: str,
             if text in ("[deleted]", "[removed]") or not text:
                 continue
             if not is_stress_related(text):
+                continue
+            if require_student_context and not is_student_context(text):
                 continue
             records.append(fmt_record(raw, record_type))
 
@@ -212,6 +247,7 @@ def main():
     print(f"  Reddit Stress Scraper")
     print(f"  Window    : {SEMESTER_START} → {SEMESTER_END}")
     print(f"  Subreddits: {TARGET_SUBREDDITS}")
+    print(f"  Student-ctx filter: {STUDENT_CONTEXT_FILTER_SUBREDDITS}")
     print(f"  Comments  : {'yes' if SCRAPE_COMMENTS else 'no'}")
     print(f"  Output    : {OUTPUT_FILE}")
     print(f"  Resuming  : {resume_count} records already in file")
@@ -221,9 +257,10 @@ def main():
 
     for sub in TARGET_SUBREDDITS:
         try:
-            scrape("posts/search",    "post",    sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter)
+            student_ctx = sub in STUDENT_CONTEXT_FILTER_SUBREDDITS
+            scrape("posts/search",    "post",    sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter, student_ctx)
             if SCRAPE_COMMENTS:
-                scrape("comments/search", "comment", sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter)
+                scrape("comments/search", "comment", sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter, student_ctx)
         except Exception as e:
             print(f"  [ERROR] r/{sub}: {e}")
 
