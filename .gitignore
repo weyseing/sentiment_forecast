@@ -2,3 +2,8 @@
 __pycache__/
 *.pyc
 *.pyo
+*.csv
+
+# macOS
+.DS_Store
+**/.DS_Store

@@ -1,134 +1,235 @@
 """
-Reddit University Sentiment Scraper
-Scrapes university-related posts and comments from Reddit for NLP sentiment analysis.
+Reddit Mental Health Sentiment Scraper
+Collects stress-related posts and comments from Reddit via Arctic Shift API
+(no API key required) for NLP sentiment analysis.
+
+Target subreddits : r/college, r/students, r/mentalhealth
+Default window    : 16-week academic semester (configurable)
+Output            : /apps/data/reddit_raw.csv  (appended page-by-page, safe to interrupt)
 """
 
-import praw
-import pandas as pd
 import os
 import time
-from datetime import datetime
+import requests
+import pandas as pd
+from datetime import datetime, timezone
 
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
 
-# --- Configuration ---
-REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID", "YOUR_CLIENT_ID")
-REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET", "YOUR_CLIENT_SECRET")
-REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "university_sentiment_scraper/1.0")
+# 16-week semester window — adjust to your target semester
+# Fall 2025: Sep 1 → Dec 21  |  Spring 2026: Jan 5 → Apr 26
+SEMESTER_START = "2025-09-01"
+SEMESTER_END   = "2025-12-21"
 
-# Subreddits related to universities / student life
-TARGET_SUBREDDITS = [
-    "college",
-    "university",
-    "gradadmissions",
-    "ApplyingToCollege",
-    "GradSchool",
-    "StudentLife",
+TARGET_SUBREDDITS = ["college", "students", "mentalhealth"]
+
+SCRAPE_COMMENTS = True  # set False to skip comments (much faster)
+
+# Keywords that signal stress / mental health content
+STRESS_KEYWORDS = [
+    "stress", "stressed", "anxiety", "anxious", "depressed", "depression",
+    "overwhelmed", "burnout", "exhausted", "mental health", "panic",
+    "struggling", "can't cope", "breakdown", "crying", "hopeless",
+    "exam", "finals", "midterm", "deadline", "failing", "failed",
+    "sleep deprived", "no motivation", "giving up", "drop out",
 ]
 
-# Keywords to filter relevant posts
-UNIVERSITY_KEYWORDS = [
-    "university", "college", "campus", "professor", "lecture",
-    "exam", "tuition", "degree", "student", "admission",
-    "faculty", "research", "scholarship", "internship", "graduation",
-]
-
-# Scraping limits
-POSTS_PER_SUBREDDIT = 100   # number of posts to fetch per subreddit
-COMMENTS_PER_POST = 20      # top-level comments to fetch per post
-OUTPUT_DIR = "data"
-OUTPUT_FILE = os.path.join(OUTPUT_DIR, "reddit_university_raw.csv")
+BASE_URL   = "https://arctic-shift.photon-reddit.com/api"
+LIMIT      = 100   # per request (max 1000)
+SLEEP_SEC  = 1.0   # polite delay between requests
+OUTPUT_DIR = "/app/data"
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, "reddit_raw.csv")
 
 
-def init_reddit() -> praw.Reddit:
-    """Initialise a read-only Reddit API client."""
-    return praw.Reddit(
-        client_id=REDDIT_CLIENT_ID,
-        client_secret=REDDIT_CLIENT_SECRET,
-        user_agent=REDDIT_USER_AGENT,
-    )
+# ---------------------------------------------------------------------------
+# CSV helpers — append page-by-page so nothing is lost on interrupt
+# ---------------------------------------------------------------------------
+
+def load_existing_ids() -> set:
+    """Return set of (id, type) already saved — used to skip duplicates on resume."""
+    if not os.path.exists(OUTPUT_FILE):
+        return set()
+    try:
+        df = pd.read_csv(OUTPUT_FILE, usecols=["id", "type"], dtype=str)
+        return set(zip(df["id"], df["type"]))
+    except Exception:
+        return set()
 
 
-def is_relevant(text: str) -> bool:
-    """Return True if the text contains at least one university keyword."""
+def append_to_csv(records: list[dict], existing_ids: set) -> int:
+    """Append new records to CSV, skipping duplicates. Returns count written."""
+    if not records:
+        return 0
+
+    new_records = [r for r in records if (str(r["id"]), r["type"]) not in existing_ids]
+    if not new_records:
+        return 0
+
+    df = pd.DataFrame(new_records)
+    write_header = not os.path.exists(OUTPUT_FILE)
+    df.to_csv(OUTPUT_FILE, mode="a", header=write_header, index=False, encoding="utf-8")
+
+    for r in new_records:
+        existing_ids.add((str(r["id"]), r["type"]))
+
+    return len(new_records)
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def is_stress_related(text: str) -> bool:
     text_lower = text.lower()
-    return any(kw in text_lower for kw in UNIVERSITY_KEYWORDS)
+    return any(kw in text_lower for kw in STRESS_KEYWORDS)
 
 
-def scrape_subreddit(reddit: praw.Reddit, subreddit_name: str) -> list[dict]:
-    """Fetch posts (and their top comments) from a subreddit."""
-    records = []
-    subreddit = reddit.subreddit(subreddit_name)
+def fetch_page(endpoint: str, params: dict) -> list[dict]:
+    url = f"{BASE_URL}/{endpoint}"
+    try:
+        resp = requests.get(url, params=params, timeout=30)
+        resp.raise_for_status()
+        return resp.json().get("data", [])
+    except requests.exceptions.RequestException as e:
+        print(f"  [ERROR] {e}")
+        return []
 
-    print(f"  Scraping r/{subreddit_name} ...")
-    for submission in subreddit.hot(limit=POSTS_PER_SUBREDDIT):
-        if not is_relevant(submission.title + " " + (submission.selftext or "")):
-            continue
 
-        # --- Post record ---
-        records.append({
-            "id": submission.id,
-            "subreddit": subreddit_name,
-            "type": "post",
-            "title": submission.title,
-            "text": submission.selftext,
-            "score": submission.score,
-            "upvote_ratio": submission.upvote_ratio,
-            "num_comments": submission.num_comments,
-            "created_utc": datetime.utcfromtimestamp(submission.created_utc).isoformat(),
-            "url": submission.url,
-            "author": str(submission.author),
-            "parent_id": None,
-        })
+def fmt_record(raw: dict, record_type: str) -> dict:
+    """Normalise a raw API post or comment into our CSV schema."""
+    if record_type == "post":
+        return {
+            "id":           raw.get("id"),
+            "subreddit":    raw.get("subreddit"),
+            "type":         "post",
+            "title":        raw.get("title"),
+            "text":         raw.get("selftext"),
+            "author":       raw.get("author"),
+            "score":        raw.get("score"),
+            "upvote_ratio": raw.get("upvote_ratio"),
+            "num_comments": raw.get("num_comments"),
+            "created_utc":  datetime.fromtimestamp(raw["created_utc"], tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+            "url":          raw.get("url"),
+            "permalink":    raw.get("permalink"),
+            "parent_id":    None,
+        }
+    else:
+        return {
+            "id":           raw.get("id"),
+            "subreddit":    raw.get("subreddit"),
+            "type":         "comment",
+            "title":        None,
+            "text":         raw.get("body"),
+            "author":       raw.get("author"),
+            "score":        raw.get("score"),
+            "upvote_ratio": None,
+            "num_comments": None,
+            "created_utc":  datetime.fromtimestamp(raw["created_utc"], tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+            "url":          None,
+            "permalink":    raw.get("permalink"),
+            "parent_id":    raw.get("link_id"),
+        }
 
-        # --- Top-level comment records ---
-        submission.comments.replace_more(limit=0)  # skip MoreComments objects
-        for comment in submission.comments[:COMMENTS_PER_POST]:
-            if not comment.body or comment.body in ("[deleted]", "[removed]"):
+
+# ---------------------------------------------------------------------------
+# Scrapers
+# ---------------------------------------------------------------------------
+
+def scrape(endpoint: str, record_type: str, subreddit: str,
+           after: str, before: str, existing_ids: set, total_counter: list):
+    """
+    Generic paginator for posts or comments.
+    Appends each page to CSV immediately — safe to interrupt at any time.
+    """
+    page_before  = before
+    page_num     = 0
+    session_saved = 0
+
+    label = "posts" if record_type == "post" else "comments"
+    print(f"\n[r/{subreddit}] {label} {after} → {before}")
+
+    while True:
+        params = {
+            "subreddit": subreddit,
+            "after":     after,
+            "before":    page_before,
+            "limit":     LIMIT,
+        }
+        page = fetch_page(endpoint, params)
+
+        if not page:
+            break
+
+        page_num += 1
+
+        # Filter and save this page immediately
+        records = []
+        for raw in page:
+            text = ((raw.get("title") or "") + " " + (raw.get("selftext") or "")
+                    if record_type == "post" else (raw.get("body") or ""))
+            if text in ("[deleted]", "[removed]") or not text:
                 continue
-            records.append({
-                "id": comment.id,
-                "subreddit": subreddit_name,
-                "type": "comment",
-                "title": None,
-                "text": comment.body,
-                "score": comment.score,
-                "upvote_ratio": None,
-                "num_comments": None,
-                "created_utc": datetime.utcfromtimestamp(comment.created_utc).isoformat(),
-                "url": None,
-                "author": str(comment.author),
-                "parent_id": submission.id,
-            })
+            if not is_stress_related(text):
+                continue
+            records.append(fmt_record(raw, record_type))
 
-        time.sleep(0.5)  # polite rate-limiting
+        saved = append_to_csv(records, existing_ids)
+        session_saved += saved
+        total_counter[0] += saved
 
-    print(f"    -> {len(records)} relevant records collected from r/{subreddit_name}")
-    return records
+        oldest_utc = min(r["created_utc"] for r in page)
+        newest_utc = max(r["created_utc"] for r in page)
+        date_range = (
+            f"{datetime.fromtimestamp(oldest_utc, tz=timezone.utc).strftime('%Y-%m-%d')}"
+            f" → {datetime.fromtimestamp(newest_utc, tz=timezone.utc).strftime('%Y-%m-%d')}"
+        )
 
+        print(f"  page {page_num:>4} | {date_range} | fetched {len(page):>4} | "
+              f"matched {len(records):>4} | saved {saved:>4} | total {total_counter[0]:>7}")
+
+        if len(page) < LIMIT:
+            print(f"  -> done r/{subreddit} {label}: {session_saved} new records saved")
+            break
+
+        page_before = oldest_utc
+        time.sleep(SLEEP_SEC)
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    reddit = init_reddit()
-    all_records = []
+    # Load already-saved IDs so we skip duplicates if resuming
+    existing_ids = load_existing_ids()
+    resume_count = len(existing_ids)
+
+    print("=" * 65)
+    print(f"  Reddit Stress Scraper")
+    print(f"  Window    : {SEMESTER_START} → {SEMESTER_END}")
+    print(f"  Subreddits: {TARGET_SUBREDDITS}")
+    print(f"  Comments  : {'yes' if SCRAPE_COMMENTS else 'no'}")
+    print(f"  Output    : {OUTPUT_FILE}")
+    print(f"  Resuming  : {resume_count} records already in file")
+    print("=" * 65)
+
+    total_counter = [resume_count]  # mutable so scrape() can update it
 
     for sub in TARGET_SUBREDDITS:
         try:
-            records = scrape_subreddit(reddit, sub)
-            all_records.extend(records)
+            scrape("posts/search",    "post",    sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter)
+            if SCRAPE_COMMENTS:
+                scrape("comments/search", "comment", sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter)
         except Exception as e:
             print(f"  [ERROR] r/{sub}: {e}")
 
-    if not all_records:
-        print("No records collected. Check your API credentials or keyword filters.")
-        return
-
-    df = pd.DataFrame(all_records)
-    df.drop_duplicates(subset=["id", "type"], inplace=True)
-    df.to_csv(OUTPUT_FILE, index=False, encoding="utf-8")
-
-    print(f"\nDone. {len(df)} records saved to '{OUTPUT_FILE}'")
-    print(df[["subreddit", "type"]].value_counts().to_string())
+    print("\n" + "=" * 65)
+    print(f"  Finished. Total records in {OUTPUT_FILE}: {total_counter[0]}")
+    print("=" * 65)
 
 
 if __name__ == "__main__":

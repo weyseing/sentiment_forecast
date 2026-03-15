@@ -17,11 +17,14 @@ Predict when university students will be most stressed, using Reddit posts as da
 ---
 
 ### Step 1: Collect Data (Reddit Scraper)
-- Grab posts & comments from Reddit subreddits where students talk about uni life
+- Grab posts & comments from Reddit via **Arctic Shift API** (free, no API key, historical archive)
 - **Subreddits:** r/college, r/students, r/mentalhealth
-- **Duration:** 16 weeks (one full academic semester = 112 days)
-- **Filter for:** Posts mentioning stress, anxiety, exams, deadlines, overwhelmed, depressed, etc.
-- **Output:** CSV file — one row per post/comment, with text + timestamp
+- **Duration:** 16 weeks (one full academic semester = 112 days), default Fall 2025: Sep 1 → Dec 21
+- **Two-stage filtering:**
+  - Stage 1 (scraper): broad keyword filter (30 stress keywords) to narrow ~50k posts → ~10-15k candidates
+  - Stage 2 (NLP, next step): VADER + RoBERTa to confirm which candidates are genuinely stress-related
+- Appends to CSV page-by-page — safe to interrupt and resume
+- **Output:** `data/reddit_raw.csv` — one row per post/comment, with text + timestamp
 
 ---
 
@@ -119,13 +122,13 @@ Reddit Posts
 
 | File | Purpose |
 |------|---------|
-| `src/scrape_reddit.py` | Reddit data collection via PRAW |
+| `src/scrape_reddit.py` | Reddit data collection via Arctic Shift API (no API key needed) |
 
 ## Data
 
 | File | Description |
 |------|-------------|
-| `data/reddit_university_raw.csv` | Raw scraped posts/comments |
+| `data/reddit_raw.csv` | Raw scraped posts/comments (keyword-filtered candidates) |
 
 ## Assessments
 
