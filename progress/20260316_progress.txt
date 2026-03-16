@@ -1,0 +1,61 @@
+# Progress Log — 2026-03-16
+
+---
+
+## Step 3: Daily Count Aggregation
+
+### Completed
+- Created `src/3_aggregate_counts.py`
+- CLI args: `--input` / `--output` / `--start` / `--end`
+- Aggregates classified CSV into daily stress counts with:
+  - Core counts: `total_posts`, `stressed`, `not_stressed`, `needs_review`, `stress_rate`
+  - Calendar features: `week_number`, `day_of_week`, `day_of_week_name`, `day_number`
+  - Time-series features: `rolling_7d`, `z_score`, `is_spike`
+  - Semester phase: `semester_period` (early / mid / pre_finals / finals)
+- Output: `data/3_daily_counts.csv` (111 rows × 15 columns)
+
+### Run on prior scrape (data/2_reddit_labeled_1.csv)
+- 35,771 rows in semester window (Fall 2025: Sep 1 → Dec 20)
+- Stressed: 20,744 (58.0%) | Not stressed: 4,184 (11.7%) | Needs review: 10,843 (30.3%)
+- Avg stress rate/day: 81.6%
+- Min: 74 stressed posts (2025-09-05) | Max: 358 (2025-11-06)
+
+### Key Patterns Found
+- Clear structural break at Week 9 (Oct 27): stress 2.4× from ~750/week → ~1,764/week (midterm period)
+- Strong autocorrelation: Lag-1 ACF = 0.906, Lag-7 ACF = 0.810 → weekly seasonality confirmed
+- Non-stationary: mean rises 110 → 262 (first vs second half) → log transform / differencing needed for ARIMA
+- Day-of-week: Wednesday highest (avg 213.6), Friday/Saturday lowest (~166-171)
+- Only 1 spike day detected (z > 2.0): 2025-11-06 (z = 2.05)
+- Semester period breakdown:
+  - early (days 1-28):      avg 108.9 stressed/day
+  - mid (days 29-56):       avg 111.0 stressed/day
+  - pre_finals (days 57-84): avg 274.6 stressed/day  ← sharp jump
+  - finals (days 85-111):   avg 255.5 stressed/day
+
+---
+
+## Step 1 Re-scrape (queued — running overnight)
+
+### Config changes made to src/1_scrape_reddit.py, src/3_aggregate_counts.py, src/check_dataset.py
+- Extended window to 2 full academic years: `2024-01-15` → `2025-12-20`
+  - Covers: Spring 2024, Fall 2024, Spring 2025, Fall 2025 (4 semesters)
+  - Rationale: Prophet/ARIMA need 2+ complete annual cycles to detect semester-level seasonality reliably
+- Reduced subreddits from 10 → 4 to reduce scrape time:
+  - Kept: r/college, r/students, r/GradSchool, r/mentalhealth
+  - Dropped: r/AskAcademia, r/learnprogramming, r/premed, r/lawschool, r/nursing, r/EngineeringStudents
+- All date defaults now consistent across all src/*.py files (verified clean, no old dates remaining)
+- Existing Fall 2025 rows will not be re-downloaded (deduplication by ID)
+
+### To run
+```bash
+python src/1_scrape_reddit.py
+```
+
+---
+
+## Next Steps
+- [ ] Run Step 1 re-scrape overnight (2024-01-15 → 2025-12-20)
+- [ ] Run Step 2 classifier on new combined dataset
+- [ ] Re-run Step 3 with `--start 2024-01-15 --end 2025-12-20`
+- [ ] Step 4: `4_model_glm.py` — Poisson / Negative Binomial GLM
+- [ ] Step 5: `5_forecast.py` — Prophet + ARIMA forecasting

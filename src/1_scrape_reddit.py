@@ -3,10 +3,8 @@ Reddit Mental Health Sentiment Scraper
 Collects stress-related posts and comments from Reddit via Arctic Shift API
 (no API key required) for NLP sentiment analysis.
 
-Target subreddits : r/college, r/students, r/mentalhealth, r/GradSchool,
-                    r/AskAcademia, r/learnprogramming, r/premed, r/lawschool,
-                    r/nursing, r/EngineeringStudents
-Default window    : 16-week academic semester (configurable)
+Target subreddits : r/college, r/students, r/GradSchool, r/mentalhealth
+Default window    : 2 academic years — Spring 2024 → Fall 2025 (Jan 2024 → Dec 2025)
 Output            : /app/data/1_reddit_raw.csv  (appended page-by-page, safe to interrupt)
 
 Note: r/mentalhealth requires an additional student-context keyword match to
@@ -24,16 +22,15 @@ from datetime import datetime, timezone
 # Configuration
 # ---------------------------------------------------------------------------
 
-# 16-week semester window — adjust to your target semester
-# Fall 2025: Sep 1 → Dec 21  |  Spring 2026: Jan 5 → Apr 26
-SEMESTER_START = "2025-09-01"
-SEMESTER_END   = "2025-12-21"
+# Two academic years: Spring 2024 → Fall 2025
+# Spring 2024: Jan 15 → May 10  |  Fall 2024: Sep 2 → Dec 20
+# Spring 2025: Jan 13 → May 9   |  Fall 2025: Sep 1 → Dec 20
+SEMESTER_START = "2024-01-15"
+SEMESTER_END   = "2025-12-20"
 
 TARGET_SUBREDDITS = [
-    # General student communities
-    "college", "students", "GradSchool", "AskAcademia",
-    # Discipline-specific student communities
-    "learnprogramming", "premed", "lawschool", "nursing", "EngineeringStudents",
+    # General student communities (high volume, high signal)
+    "college", "students", "GradSchool",
     # General mental health — filtered by STUDENT_CONTEXT_KEYWORDS
     "mentalhealth",
 ]
