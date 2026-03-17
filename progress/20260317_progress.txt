@@ -1,0 +1,82 @@
+# Progress Log — 2026-03-17
+
+---
+
+## Summary
+Completed Step 4 (GLM) on 1-semester dataset. Fixed scraper issues. Minor script cleanups.
+
+---
+
+## Step 1 — Scraper Fixes
+
+### Completeness check on data/1_reddit_raw.csv (2-year scrape)
+- 138,058 rows | 2024-01-15 to 2025-12-19 | 705/706 days covered
+- r/college: 705/706 | r/mentalhealth: 705/706 | r/GradSchool: 705/706
+- r/Students: 558/706 — low activity subreddit (2.4 rows/day avg), not a scrape failure
+- Missing day: 2025-12-20 for all subreddits — API before param is exclusive
+
+### Fixes applied to src/1_scrape_reddit.py
+- Added --start / --end CLI args (defaults remain 2024-01-15 / 2025-12-21)
+- Changed SEMESTER_END from 2025-12-20 to 2025-12-21 so API before param includes Dec 20
+- To re-scrape r/Students only: python src/1_scrape_reddit.py --subreddit students
+- To fill missing last day: python src/1_scrape_reddit.py --start 2025-12-20 --end 2025-12-21
+
+### Fixes applied to src/check_dataset.py
+- Removed Section 7 (Summary Flags) — flags were misleading for this dataset
+
+---
+
+## Step 3 — Daily Count Aggregation (1-semester)
+
+- Ran 3_aggregate_counts.py on data/2_reddit_labeled_1sem.csv
+- Output: data/3_daily_counts_1sem.csv (111 rows x 15 cols, Sep 1 to Dec 20, 2025)
+
+---
+
+## Step 4 — GLM: Poisson vs Negative Binomial
+
+### Script created: src/4_model_glm.py
+
+Input : data/3_daily_counts_1sem.csv
+Outputs:
+  data/4_irr_table.csv         — IRRs with 95% CI and significance stars
+  data/4_model_comparison.csv  — AIC/BIC/log-likelihood comparison
+  data/4_residuals.png         — deviance residual plots
+
+### Key decisions
+- Dependent variable: stressed (daily count)
+- Formula: stressed ~ C(semester_period) + C(day_of_week_name)
+- sem_week excluded — collinear with semester_period (derived from it),
+  caused counterintuitive negative IRRs when both included
+- Reference categories: early (semester), Monday (day of week)
+- Used smf.negativebinomial() for proper MLE alpha estimation
+  (not smf.glm with NegativeBinomial family which requires pre-specified alpha)
+
+### Results
+
+Overdispersion: Variance/Mean = 14.05 — heavily overdispersed, NB confirmed
+
+Model comparison:
+  Poisson           AIC = 1393.45
+  Negative Binomial AIC = 1084.56  <- Winner
+
+IRR table (NB model):
+  finals      IRR = 1.510  p<0.001  — 51% more stressed posts vs early semester
+  pre_finals  IRR = 1.202  p<0.001  — 20% more stressed posts vs early semester
+  mid         IRR = 1.077  p=0.09   — not significantly different from early
+  Wednesday   IRR = 1.153  p<0.05   — 15% higher than Monday
+  Saturday    IRR = 0.815  p<0.001  — 18% lower than Monday
+  Sunday      IRR = 0.829  p<0.01   — 17% lower than Monday
+  alpha       IRR = 0.021  p<0.001  — overdispersion confirmed
+
+### Packages added to requirements.txt
+  statsmodels>=0.14.0
+  matplotlib>=3.7.0
+
+---
+
+## Next Steps
+- [ ] Rerun scraper for r/Students full range (deduplication safe)
+- [ ] Fill 2025-12-20 for all subreddits (--start 2025-12-20 --end 2025-12-21)
+- [ ] Step 5: 5_forecast.py — Prophet + ARIMA forecasting on 1-semester data
+- [ ] Re-run Steps 2-5 on full 2-year dataset once scrape is complete

@@ -187,39 +187,6 @@ def report_content_quality(df: pd.DataFrame):
     print(f"    Score ≤ 0: {neg_pct:.1f}%")
 
 
-def report_flags(df: pd.DataFrame, start: date, end: date):
-    section("7. SUMMARY FLAGS")
-    flags = []
-
-    # Dec 21 check
-    if end not in set(df['date'].unique()):
-        flags.append(f"End date {end} not found in data — scrape may have stopped at {df['date'].max()}.")
-
-    # r/Students thin
-    students = df[df['subreddit'] == 'Students']
-    if len(students) > 0:
-        avg_daily = len(students) / df['date'].nunique()
-        if avg_daily < 10:
-            flags.append(f"r/Students very thin ({avg_daily:.1f} rows/day avg) — low signal, note in methodology.")
-
-    # Dominant subreddit
-    counts = df['subreddit'].value_counts()
-    top_pct = counts.iloc[0] / len(df) * 100
-    if top_pct > 40:
-        flags.append(f"r/{counts.index[0]} dominates at {top_pct:.1f}% — may skew aggregate daily counts.")
-
-    # Duplicate IDs
-    dupes = df.duplicated(subset='id').sum()
-    if dupes > 0:
-        flags.append(f"{dupes} duplicate IDs detected.")
-
-    if flags:
-        for f in flags:
-            warn(f)
-    else:
-        ok("No flags — data looks clean and ready for Step 2 classifier.")
-
-
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -253,7 +220,6 @@ def main():
     report_daily_counts(df)
     report_weekly_trend(df)
     report_content_quality(df)
-    report_flags(df, start, end)
 
     print(f"\n{'═' * 60}\n")
 

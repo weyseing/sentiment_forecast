@@ -4,3 +4,5 @@ tqdm>=4.66.0
 vaderSentiment>=3.3.2
 transformers>=4.40.0
 torch>=2.0.0
+statsmodels>=0.14.0
+matplotlib>=3.7.0

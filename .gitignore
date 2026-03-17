@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.csv
+*.png
 
 # macOS
 .DS_Store

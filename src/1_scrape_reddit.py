@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 # Spring 2024: Jan 15 → May 10  |  Fall 2024: Sep 2 → Dec 20
 # Spring 2025: Jan 13 → May 9   |  Fall 2025: Sep 1 → Dec 20
 SEMESTER_START = "2024-01-15"
-SEMESTER_END   = "2025-12-20"
+SEMESTER_END   = "2025-12-21"
 
 TARGET_SUBREDDITS = [
     # General student communities (high volume, high signal)
@@ -242,6 +242,16 @@ def main():
         metavar="SUB",
         help="Only scrape these subreddit(s), e.g. --subreddit nursing EngineeringStudents",
     )
+    parser.add_argument(
+        "--start",
+        default=SEMESTER_START,
+        help=f"Start date YYYY-MM-DD (default: {SEMESTER_START})",
+    )
+    parser.add_argument(
+        "--end",
+        default=SEMESTER_END,
+        help=f"End date YYYY-MM-DD (default: {SEMESTER_END})",
+    )
     args = parser.parse_args()
 
     if args.subreddit:
@@ -260,7 +270,7 @@ def main():
 
     print("=" * 65)
     print(f"  Reddit Stress Scraper")
-    print(f"  Window    : {SEMESTER_START} → {SEMESTER_END}")
+    print(f"  Window    : {args.start} → {args.end}")
     print(f"  Subreddits: {subreddits}")
     print(f"  Student-ctx filter: {STUDENT_CONTEXT_FILTER_SUBREDDITS}")
     print(f"  Comments  : {'yes' if SCRAPE_COMMENTS else 'no'}")
@@ -273,9 +283,9 @@ def main():
     for sub in subreddits:
         try:
             student_ctx = sub in STUDENT_CONTEXT_FILTER_SUBREDDITS
-            scrape("posts/search",    "post",    sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter, student_ctx)
+            scrape("posts/search",    "post",    sub, args.start, args.end, existing_ids, total_counter, student_ctx)
             if SCRAPE_COMMENTS:
-                scrape("comments/search", "comment", sub, SEMESTER_START, SEMESTER_END, existing_ids, total_counter, student_ctx)
+                scrape("comments/search", "comment", sub, args.start, args.end, existing_ids, total_counter, student_ctx)
         except Exception as e:
             print(f"  [ERROR] r/{sub}: {e}")
 
