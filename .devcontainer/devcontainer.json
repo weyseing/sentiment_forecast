@@ -1,0 +1,16 @@
+{
+  "name": "Sentiment Forecast",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "sentiment_forecast",
+  "workspaceFolder": "/app",
+  "remoteUser": "appuser",
+  "overrideCommand": false,
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "xshrim.txt-syntax"
+      ]
+    }
+  }
+}

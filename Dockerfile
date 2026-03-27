@@ -22,6 +22,9 @@ ENV CLICOLOR_FORCE=1
 # Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
+# Non-root user
+RUN useradd --create-home --shell /bin/bash appuser
+
 # Python dependencies
 WORKDIR /app
 COPY requirements.txt .
@@ -29,7 +32,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Project files
 COPY . .
-RUN mkdir -p data
+
+# app user
+RUN chown -R appuser:appuser /app
+USER appuser
 
 # Keep container alive
 CMD ["tail", "-f", "/dev/null"]

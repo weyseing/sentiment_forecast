@@ -69,27 +69,20 @@ def main():
     # ── 3. Feature engineering ────────────────────────────────────────────────
     section("3. FEATURE ENGINEERING")
 
-    # Set reference categories (absorbed into intercept)
-    # semester_period: "early" is reference  → IRRs show change vs early semester
     # day_of_week_name: "Monday" is reference → IRRs show change vs Monday
-    df["semester_period"] = pd.Categorical(
-        df["semester_period"],
-        categories=["early", "mid", "pre_finals", "finals"],
-        ordered=False,
-    )
     df["day_of_week_name"] = pd.Categorical(
         df["day_of_week_name"],
         categories=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         ordered=False,
     )
 
-    # sem_week excluded: it is derived directly from semester_period (weeks 1-4=early,
-    # 5-8=mid, 9-12=pre_finals, 13-16=finals), so including both causes multicollinearity
-    # and produces counterintuitive negative IRRs for the later periods.
-    formula = "stressed ~ C(semester_period, Treatment('early')) + C(day_of_week_name, Treatment('Monday'))"
+    # week_number: continuous predictor capturing long-term trend across 2 years
+    # day_number excluded: collinear with week_number (day_number = week_number * 7 ± offset)
+    formula = "stressed ~ week_number + C(day_of_week_name, Treatment('Monday'))"
     print(f"  Formula : {formula}")
-    print(f"  Reference category — semester_period: 'early'  |  day_of_week: 'Monday'")
-    print(f"  Note: sem_week excluded (collinear with semester_period)")
+    print(f"  Predictors — week_number (trend) + day_of_week (seasonality)")
+    print(f"  Reference category — day_of_week: 'Monday'")
+    print(f"  Note: day_number excluded (collinear with week_number)")
 
     # ── 4. Fit Poisson GLM ────────────────────────────────────────────────────
     section("4. FIT POISSON GLM")

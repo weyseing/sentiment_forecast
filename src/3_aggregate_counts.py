@@ -43,7 +43,6 @@ Columns in output CSV:
   rolling_7d        — 7-day centred rolling mean of stressed count
   z_score           — (stressed - mean) / std  (spike detection)
   is_spike          — 1 if z_score > 2.0, else 0
-  semester_period   — early / mid / pre_finals / finals
 
 Examples:
   python src/3_aggregate_counts.py --input data/2_reddit_labeled.csv
@@ -156,13 +155,6 @@ def main():
     daily['z_score'] = ((s_vals - mean_) / std_).round(3)
     daily['is_spike'] = (daily['z_score'] > 2.0).astype(int)
 
-    # Semester period (16-week semester split into 4 phases of ~4 weeks each)
-    def semester_period(day_num):
-        if day_num <= 28:   return 'early'       # weeks 1–4
-        if day_num <= 56:   return 'mid'          # weeks 5–8
-        if day_num <= 84:   return 'pre_finals'   # weeks 9–12
-        return 'finals'                            # weeks 13–16
-    daily['semester_period'] = daily['day_number'].apply(semester_period)
 
     daily['date'] = daily['date'].dt.date                       # back to date
 
@@ -223,16 +215,16 @@ def main():
 
     # ── ASCII daily chart with 7-day rolling average ───────────────────────────
     section("DAILY TIME SERIES (ASCII CHART)")
-    chart_w = 111
     chart_h = 16
     vals = daily['stressed'].tolist()
     roll = daily['rolling_7d'].tolist()
+    chart_w = min(len(vals), 200)
     v_max = max(vals)
     def scale(v): return int(round(v / v_max * (chart_h - 1)))
 
     # Build grid
     grid = [[' '] * chart_w for _ in range(chart_h)]
-    for x, (v, r) in enumerate(zip(vals, roll)):
+    for x, (v, r) in enumerate(zip(vals[:chart_w], roll[:chart_w])):
         sv = scale(v)
         grid[chart_h - 1 - sv][x] = '▪'        # daily count dot
         if not np.isnan(r):
@@ -252,30 +244,15 @@ def main():
             week_labels += f"W{wk:<6}"
     print(f"       {week_labels}")
 
-    # ── Semester period breakdown ──────────────────────────────────────────────
-    section("SEMESTER PERIOD BREAKDOWN")
-    period_order = ['early', 'mid', 'pre_finals', 'finals']
-    period_stats = daily.groupby('semester_period').agg(
-        days=('stressed', 'count'),
-        total_stressed=('stressed', 'sum'),
-        avg_stressed=('stressed', 'mean'),
-        avg_rolling=('rolling_7d', 'mean'),
-    ).round(1)
-    period_stats = period_stats.reindex([p for p in period_order if p in period_stats.index])
-    print(f"  {'Period':<12} {'Days':>5} {'Total':>7} {'Avg/day':>9} {'7d Avg':>8}")
-    print(f"  {'-'*12} {'-'*5} {'-'*7} {'-'*9} {'-'*8}")
-    for period, row in period_stats.iterrows():
-        print(f"  {period:<12} {int(row['days']):>5} {int(row['total_stressed']):>7,} {row['avg_stressed']:>9.1f} {row['avg_rolling']:>8.1f}")
-
     # ── Spike detection ────────────────────────────────────────────────────────
     section("SPIKE DETECTION  (z-score > 2.0)")
-    spikes = daily[daily['is_spike'] == 1][['date', 'stressed', 'z_score', 'day_of_week_name', 'semester_period']]
+    spikes = daily[daily['is_spike'] == 1][['date', 'stressed', 'z_score', 'day_of_week_name']]
     if len(spikes):
         print(f"  {len(spikes)} spike day(s) detected:\n")
-        print(f"  {'Date':<12} {'Stressed':>9} {'Z-score':>8}  {'Day':<12} Period")
-        print(f"  {'-'*12} {'-'*9} {'-'*8}  {'-'*12} {'-'*12}")
+        print(f"  {'Date':<12} {'Stressed':>9} {'Z-score':>8}  {'Day':<12}")
+        print(f"  {'-'*12} {'-'*9} {'-'*8}  {'-'*12}")
         for _, row in spikes.sort_values('z_score', ascending=False).iterrows():
-            print(f"  {str(row['date']):<12} {row['stressed']:>9,} {row['z_score']:>8.2f}  {row['day_of_week_name']:<12} {row['semester_period']}")
+            print(f"  {str(row['date']):<12} {row['stressed']:>9,} {row['z_score']:>8.2f}  {row['day_of_week_name']:<12}")
     else:
         print("  No spike days detected.")
 
@@ -286,14 +263,25 @@ def main():
     print(f"  {'-'*5} {'-'*7} {'-'*35}")
     for lag in [1, 2, 3, 7, 14, 21]:
         acf = series.autocorr(lag=lag)
-        if abs(acf) >= 0.7:   interp = "strong correlation"
-        elif abs(acf) >= 0.4: interp = "moderate correlation"
-        elif abs(acf) >= 0.2: interp = "weak correlation"
+        if abs(acf) >= 0.5:   interp = "strong correlation"
+        elif abs(acf) >= 0.3: interp = "moderate correlation"
+        elif abs(acf) >= 0.1: interp = "weak correlation"
         else:                  interp = "negligible"
         bar = ('▓' if acf > 0 else '░') * int(abs(acf) * 20)
         print(f"  {lag:<5} {acf:>+.3f}  {bar:<20} {interp}")
-    print(f"\n  Note: Lag-7 > 0.4 → weekly seasonality (use Prophet/SARIMA)")
-    print(f"        Lag-1 > 0.7 → strong trend component")
+    lag1  = series.autocorr(lag=1)
+    lag7  = series.autocorr(lag=7)
+    notes = []
+    if abs(lag7) >= 0.4:
+        notes.append("Lag-7 ≥ 0.4 ✓ → weekly seasonality detected (use Prophet/SARIMA)")
+    if abs(lag1) >= 0.5:
+        notes.append("Lag-1 ≥ 0.5 ✓ → strong trend component (consider differencing for ARIMA)")
+    elif abs(lag1) >= 0.3:
+        notes.append(f"Lag-1 = {lag1:+.3f} (moderate persistence, no strong trend)")
+    if notes:
+        print()
+        for n in notes:
+            print(f"  → {n}")
 
     # ── Stationarity check ─────────────────────────────────────────────────────
     section("STATIONARITY CHECK  (first half vs second half)")
@@ -305,11 +293,21 @@ def main():
     print(f"  {'Mean':<18} {h1.mean():>12.1f} {h2.mean():>12.1f} {(h2.mean()-h1.mean()):>+10.1f}")
     print(f"  {'Std dev':<18} {h1.std():>12.1f} {h2.std():>12.1f} {(h2.std()-h1.std()):>+10.1f}")
     print(f"  {'Variance':<18} {h1.var():>12.1f} {h2.var():>12.1f} {(h2.var()-h1.var()):>+10.1f}")
-    if h2.mean() > h1.mean() * 1.3:
-        print(f"\n  ⚠  Non-stationary: mean rises sharply in second half.")
-        print(f"     → Apply log transform or differencing before ARIMA.")
+    mean_unstable = h2.mean() > h1.mean() * 1.3 or h2.mean() < h1.mean() * 0.7
+    var_ratio = h2.var() / h1.var() if h1.var() > 0 else 1.0
+    var_unstable = var_ratio < 0.6 or var_ratio > 1.67  # variance changes by >40%
+
+    if mean_unstable and var_unstable:
+        print(f"\n  ⚠  Non-stationary: mean and variance both change substantially.")
+        print(f"     → Apply log transform + differencing before ARIMA.")
+    elif mean_unstable:
+        print(f"\n  ⚠  Non-stationary: mean shifts sharply between halves.")
+        print(f"     → Apply differencing before ARIMA.")
+    elif var_unstable:
+        print(f"\n  ⚠  Heteroscedastic: variance changed {var_ratio:.1f}x between halves.")
+        print(f"     → Apply log transform before ARIMA (Prophet handles this natively).")
     else:
-        print(f"\n  ✓  Mean relatively stable — series may be weakly stationary.")
+        print(f"\n  ✓  Mean and variance both stable — series likely weakly stationary.")
 
     # ── Save ──────────────────────────────────────────────────────────────────
     daily.to_csv(output_path, index=False)
