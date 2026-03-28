@@ -208,7 +208,7 @@ def plot_cv_windows(window_details, df, output_path):
     if n == 1:
         axes = [axes]
 
-    fig.suptitle("Walk-Forward Validation: Actual vs Predicted", fontsize=14, fontweight="bold")
+    fig.suptitle(f"Walk-Forward Validation: Actual vs Predicted\nInput: {df.attrs.get('source', 'unknown')}", fontsize=14, fontweight="bold")
 
     for i, wd in enumerate(window_details):
         ax = axes[i]
@@ -291,6 +291,7 @@ def main():
     section("1. LOAD DATA")
     df = pd.read_csv(args.input, parse_dates=["date"])
     df = df.sort_values("date").reset_index(drop=True)
+    df.attrs["source"] = args.input
     print(f"  Rows       : {len(df)}")
     print(f"  Date range : {df['date'].min().date()} → {df['date'].max().date()}")
     print(f"  Stressed   : min={df['stressed'].min()}  max={df['stressed'].max()}  mean={df['stressed'].mean():.1f}")
