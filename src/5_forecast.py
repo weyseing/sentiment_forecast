@@ -101,9 +101,19 @@ def forecast_prophet(train_df, horizon):
 
 # ── ARIMA forecast ────────────────────────────────────────────────────────────
 
-def forecast_sarima(train_series, horizon):
-    """Fit SARIMA(1,1,1)(1,1,1,7) on train_series, return predictions for next `horizon` days."""
-    model = SARIMAX(train_series, order=(1, 1, 1), seasonal_order=(1, 1, 1, 7))
+def forecast_sarima(train_df, horizon):
+    """Fit SARIMA(1,1,1)(1,1,1,7) on train_df, return predictions for next `horizon` days.
+
+    Reindexes to a continuous daily date range before fitting so that any
+    missing dates don't misalign the weekly seasonal period.
+    Missing days are filled with the 7-day rolling mean.
+    """
+    s = train_df.set_index("date")["stressed"].astype(float)
+    s.index = pd.to_datetime(s.index)
+    s = s.reindex(pd.date_range(s.index.min(), s.index.max(), freq="D"))
+    if s.isna().any():
+        s = s.fillna(s.rolling(7, min_periods=1, center=True).mean())
+    model = SARIMAX(s, order=(1, 1, 1), seasonal_order=(1, 1, 1, 7))
     result = model.fit(disp=False)
     forecast = result.forecast(steps=horizon)
     forecast = np.clip(np.asarray(forecast), 0, None)
@@ -162,7 +172,7 @@ def walk_forward_validation(df, horizon, n_windows, min_train, window_type="expa
 
         # SARIMA
         try:
-            a_pred = forecast_sarima(train["stressed"].values, horizon)
+            a_pred = forecast_sarima(train, horizon)
             a_mae  = mae(actual, a_pred)
             a_rmse = rmse(actual, a_pred)
             a_mape = mape(actual, a_pred)

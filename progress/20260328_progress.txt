@@ -1,0 +1,130 @@
+Progress Log — 2026-03-28
+============================================================
+
+Summary
+-------
+Completed Steps 3, 4, and 5 on the full 2-year dataset (2024-01-15 to 2025-12-19).
+GLM confirms NB model wins. Walk-forward validation implemented for Prophet vs SARIMA forecasting.
+
+
+============================================================
+Step 3 — Daily Count Aggregation (2-year dataset)
+============================================================
+
+Script : src/3_aggregate_counts.py
+Input  : data/2years/2_reddit_labeled.csv
+Output : data/2years/3_daily_counts.csv (705 rows x 14 cols)
+
+Fix applied:
+- Added filter to drop days where total_posts == 0 after the date-fill step
+- Reason: 2025-12-20 had no scraped posts (API cut-off artifact) — produced a zero row
+  that distorted downstream GLM and forecast results
+- 1 day dropped: 2025-12-20 -> final range is 2024-01-15 to 2025-12-19 (705 days)
+
+
+============================================================
+Step 4 — GLM: Poisson vs Negative Binomial (2-year dataset)
+============================================================
+
+Script  : src/4_model_glm.py
+Input   : data/2years/3_daily_counts.csv
+Outputs :
+  data/2years/4_irr_table.csv
+  data/2years/4_model_comparison.csv
+  data/2years/4_residuals.png
+
+Formula:
+  stressed ~ week_number + C(day_of_week_name, Treatment('Monday'))
+  - week_number      : continuous trend across 2 years (1-104)
+  - day_of_week_name : weekly seasonality (Monday = reference)
+  - day_number excluded: collinear with week_number
+
+Overdispersion check:
+  Mean = 100.27, Variance = 748.97, Ratio = 7.33 -> overdispersion confirmed
+
+Model comparison:
+  Poisson           AIC = 9092.50
+  Negative Binomial AIC = 6590.29  <- Winner (delta AIC ~ 2500)
+  Note: BIC not used — Poisson uses deviance-based BIC, NB uses LLF-based (incompatible)
+
+IRR table (NB model):
+  Term                    IRR     Significant
+  Intercept (Mon, wk 0)   98.3    ***
+  Tuesday                  1.023  No  (p=0.53)
+  Wednesday                1.022  No  (p=0.54)
+  Thursday                 0.977  No  (p=0.53)
+  Friday                   0.893  **  (p=0.002)
+  Saturday                 0.809  ***
+  Sunday                   0.853  ***
+  week_number              1.003  ***
+  alpha                    1.057  ***
+
+Key findings:
+- Mon-Thu are not significantly different from each other
+- Fri/Sat/Sun have 11-19% fewer stressed posts than Monday (weekend effect)
+- Stress posts growing +0.3%/week -> +37% over 2 years
+- alpha significant -> overdispersion real, NB justified
+
+
+============================================================
+Step 5 — Time Series Forecasting: Prophet vs SARIMA
+============================================================
+
+Script  : src/5_forecast.py
+Input   : data/2years/3_daily_counts.csv
+Outputs :
+  data/2years/5_cv_scores.csv
+  data/2years/5_cv_summary.csv
+  data/2years/5_cv_plot.png
+  data/2years/5_final_forecast.csv
+  data/2years/5_final_forecast.png
+
+Models:
+- Prophet (Facebook): yearly + weekly seasonality, multiplicative mode
+- SARIMA(1,1,1)(1,1,1,7): statsmodels SARIMAX, seasonal period = 7 (weekly)
+- ARIMA(1,1,1) tested first — produced flat forecasts (no seasonality), replaced by SARIMA
+
+Validation strategy:
+  Walk-forward validation with expanding window
+  4 windows, horizon = 21 days (3 weeks), min_train = 180 days
+  Split points evenly spaced: linspace(180, 684, 4) = [180, 348, 516, 684]
+
+CV results:
+  Window  Train end    Train days  Prophet MAE  SARIMA MAE
+  1       2024-07-12   180         77.6         18.6
+  2       2024-12-27   348         20.9         18.3
+  3       2025-06-13   516         18.8         12.9
+  4       2025-11-28   684         10.7         12.5   <- Prophet wins this window
+  Mean                             32.01        15.57  <- SARIMA wins overall
+
+Key findings:
+- SARIMA wins overall (mean MAE 15.57 vs 32.01)
+- Prophet Window 1 MAE=77.6 — needs at least 1 full year to learn yearly seasonality
+- Prophet improves drastically with more data (77.6 -> 10.7 across windows)
+- Prophet beats SARIMA on Window 4 (10.7 vs 12.5) — most recent, most data-rich window
+- Conclusion: SARIMA more robust with limited data; Prophet competitive with full 2-year history
+
+CLI args:
+  python src/5_forecast.py
+    --input       data/2years/3_daily_counts.csv
+    --output-dir  data/2years
+    --horizon     21          (forecast days per window, default 21)
+    --windows     4           (number of walk-forward windows, default 4)
+    --min-train   180         (min training days before first window, default 180)
+    --window-type expanding   (expanding or sliding, default expanding)
+
+Fixes applied to src/5_forecast.py:
+- Replaced ARIMA with SARIMA(1,1,1)(1,1,1,7) for weekly seasonality
+- SARIMA now reindexes train data to full daily date range before fitting
+  (prevents gap-induced misalignment of weekly seasonal period=7)
+- Prophet already handles gaps natively via ds date column
+- Added --window-type arg: expanding (default) or sliding (fixed train size)
+- Sliding window tested — worse for Prophet (needs long history); expanding recommended
+
+
+============================================================
+Next Steps
+============================================================
+- Interpret final forecast plot (5_final_forecast.png) for report write-up
+- Consider adding exam-week features to Prophet via holidays API (Step 5 enhancement)
+- Write up Steps 3-5 findings for Assessment / Research Proposal

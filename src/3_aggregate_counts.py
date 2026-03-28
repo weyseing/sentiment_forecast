@@ -137,6 +137,12 @@ def main():
     daily[['total_posts', 'stressed', 'not_stressed', 'needs_review']] = \
         daily[['total_posts', 'stressed', 'not_stressed', 'needs_review']].astype(int)
 
+    # Drop days with no scraped posts — scraper cut-off artifacts, not real zeros
+    zero_days = daily[daily['total_posts'] == 0]
+    if len(zero_days) > 0:
+        print(f"  Dropped {len(zero_days)} day(s) with no scraped posts: {zero_days['date'].tolist()}")
+        daily = daily[daily['total_posts'] > 0].reset_index(drop=True)
+
     # ── Calendar features ─────────────────────────────────────────────────────
     daily['date'] = pd.to_datetime(daily['date'])
     daily['week_number'] = daily['date'].dt.isocalendar().week.astype(int)
