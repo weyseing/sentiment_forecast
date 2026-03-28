@@ -9,7 +9,7 @@
 
 ---
 
-## Full Pipeline Explained Simply
+## Full Pipeline
 
 ### Goal
 Predict when university students will be most stressed, using Reddit posts as data.
@@ -18,103 +18,96 @@ Predict when university students will be most stressed, using Reddit posts as da
 
 ### Step 1: Collect Data (Reddit Scraper)
 - Grab posts & comments from Reddit via **Arctic Shift API** (free, no API key, historical archive)
-- **Subreddits:** r/college, r/students, r/GradSchool, r/AskAcademia, r/learnprogramming, r/premed, r/lawschool, r/nursing, r/EngineeringStudents, r/mentalhealth (student-context filtered)
-- **Duration:** 16 weeks (one full academic semester = 112 days), default Fall 2025: Sep 1 → Dec 21
+- **Subreddits in dataset:** r/college, r/Students, r/GradSchool, r/mentalhealth (student-context filtered)
+- **Duration:** 2 years — 2024-01-15 to 2025-12-19 (705 days)
 - **Two-stage filtering:**
-  - Stage 1 (scraper): broad keyword filter (stress keywords); r/mentalhealth also requires a student-context keyword match (e.g. "exam", "semester", "campus") to avoid general-population noise
-  - Stage 2 (NLP, next step): VADER + RoBERTa to confirm which candidates are genuinely stress-related
-- Appends to CSV page-by-page — safe to interrupt and resume
-- **Output:** `data/reddit_raw.csv` — one row per post/comment, with text + timestamp
-- **Prior scrape:** `data/reddit_raw_1.csv` — original scrape (college/students/mentalhealth only, 35k rows, Fall 2025)
+  - Stage 1 (scraper): broad keyword filter (stress keywords); r/mentalhealth also requires student-context keyword match (e.g. "exam", "semester", "campus")
+  - Stage 2 (NLP, Step 2): VADER + RoBERTa to confirm genuine stress
+- **Output:** `data/2years/1_reddit_raw.csv` — 138,058 rows
 
 ---
 
-### Step 2: NLP — Is this post "stressed"? (Yes/No)
+### Step 2: NLP Classification — Is this post "stressed"? (Yes/No)
 
-Each post gets classified as **stress = 1** or **not stress = 0** using two models:
+Each post classified as **stress = 1** or **not stress = 0** using hybrid of two models:
 
 | Model | How it works | Strength | Weakness |
 |-------|-------------|----------|----------|
 | VADER | Dictionary lookup, scores -1 to +1 | Fast, explainable | Misses sarcasm & context |
-| RoBERTa | AI transformer, trained on text | Understands context | Slower, black box |
+| RoBERTa | AI transformer | Understands context | Slower, black box |
 
 **Decision logic:**
-- Both say STRESSED → Stressed (high confidence)
-- Both say NOT STRESSED → Not stressed (high confidence)
-- They disagree (~15-20% of posts) → Manual review by principal investigator
+- Both say STRESSED → 1 (high confidence)
+- Both say NOT STRESSED → 0 (high confidence)
+- They disagree → -1 (manual review by principal investigator)
 
-**Output:** Same CSV + a new column `is_stressed = 1 or 0`
-
----
-
-### Step 3: Count Aggregation — Numbers per Day
-
-Take all the Yes/No labels and count them up by day:
-
-```
-Date         | Stress Posts
--------------|-------------
-2025-03-01   |  12
-2025-03-02   |  8
-2025-03-03   |  45   ← exam day spike!
-...
-```
-
-- **Output:** 112 rows (16 weeks × 7 days), one column = daily stress count
+**Output:** `data/2years/2_reddit_labeled.csv` — adds `vader_label`, `roberta_label`, `is_stressed`, `needs_review`
 
 ---
 
-### Step 4: Statistical Modeling — What drives the stress count?
+### Step 3: Daily Count Aggregation
 
-Fit a regression to explain WHY counts go up or down:
+Group classified posts by date into a daily time series of stressed post counts.
+
+- Days with zero total_posts are dropped (scraper cut-off artifacts)
+- **Output:** `data/2years/3_daily_counts.csv` — 705 rows
+- Key stats: mean=100.4, max=199, min=33 stressed posts/day
+
+---
+
+### Step 4: Statistical Modelling — What drives the stress count?
+
+Fit a GLM to explain WHY daily counts go up or down:
 
 ```
-stress_count ~ days_until_exam + days_after_exam + day_of_week + week_number
+stressed ~ week_number + C(day_of_week_name, Treatment('Monday'))
 ```
 
 Compare two models:
-- **Poisson** — assumes variance ≈ mean (probably too simple for social media spikes)
-- **Negative Binomial** — handles overdispersion/spikes better (likely winner)
+- **Poisson** — assumes variance = mean (too simple for social media spikes)
+- **Negative Binomial** — handles overdispersion (winner, ΔAIC = 2,381)
 
-Pick winner using AIC/BIC score (lower = better).
+**Key results:**
+- Overdispersion ratio = 7.33 — NB justified
+- Weekend effect: Sat -18%, Sun -15%, Fri -11% vs Monday (all significant)
+- Mon–Thu: no significant difference
+- Upward trend: +0.3%/week = +37% over 2 years
 
-**Output:** Incidence rate ratios (IRRs) — e.g. "3 days before exam = 2× more stress posts"
+**Output:** `data/2years/4_irr_table.csv`, `4_model_comparison.csv`, `4_residuals.png`
 
 ---
 
 ### Step 5: Forecasting — Predict future stress surges
 
-Feed the 112-day count series into forecasting models:
+Walk-forward validation (expanding window, 4 windows, horizon=21 days):
 
-| Model | Type | Priority |
-|-------|------|----------|
-| Prophet | Facebook's tool, handles academic calendar events | Primary (essential) |
-| ARIMA | Classical stats baseline | Comparative |
-| LSTM | Deep learning, non-linear patterns | Optional (if time permits) |
+| Model | Type | Result |
+|-------|------|--------|
+| Prophet | Facebook, yearly + weekly seasonality, multiplicative | Mean MAE = 32.01 |
+| SARIMA(1,1,1)(1,1,1,7) | Seasonal ARIMA, weekly period=7 | Mean MAE = 15.57 (Winner) |
 
-- Predict **2–4 weeks ahead** with confidence intervals
-- Evaluate on **last 3 weeks** (held out, never trained on) using MAE, RMSE, MAPE
+- ARIMA(1,1,1) was tested first but produced flat forecasts — replaced by SARIMA
+- Prophet beats SARIMA on Window 4 (MAE 10.7 vs 12.5) when trained on full 2-year data
+- Prophet needs at least 1 full year of data to learn yearly seasonality
 
-**Output:** Forecast charts — e.g. "Week 12 will be high stress — finals period"
+**Output:** `data/2years/5_cv_scores.csv`, `5_cv_summary.csv`, `5_cv_plot.png`, `5_final_forecast.csv`, `5_final_forecast.png`
 
 ---
 
 ### Full Pipeline Summary
 
 ```
-Reddit Posts
+Reddit Posts (4 subreddits, 2 years)
     ↓
-[Scraper] → raw CSV
+[src/1_scrape_reddit.py] → data/2years/1_reddit_raw.csv (138,058 rows)
     ↓
-[VADER + RoBERTa hybrid] → is_stressed column (1/0)
+[src/2_classify_sentiment.py] → data/2years/2_reddit_labeled.csv
     ↓
-[Daily Count Aggregation] → 112-day time series
+[src/3_aggregate_counts.py] → data/2years/3_daily_counts.csv (705 days)
     ↓
-[Poisson / Negative Binomial GLM] → understand drivers
+[src/4_model_glm.py] → NB GLM: weekend effect + upward trend confirmed
     ↓
-[Prophet / ARIMA / LSTM] → predict future surges
-    ↓
-"Week 14 will have 40% more stress posts than average"
+[src/5_forecast.py] → SARIMA wins overall; Prophet competitive with full data
 ```
 
 ---
@@ -123,16 +116,35 @@ Reddit Posts
 
 | File | Purpose |
 |------|---------|
-| `src/1_scrape_reddit.py` | Reddit data collection via Arctic Shift API (no API key needed) |
-| `src/2_classify_sentiment.py` | VADER + RoBERTa hybrid classification → `is_stressed` label |
+| `src/1_scrape_reddit.py` | Reddit data collection via Arctic Shift API |
+| `src/2_classify_sentiment.py` | VADER + RoBERTa hybrid classification |
+| `src/3_aggregate_counts.py` | Daily stress count aggregation |
+| `src/4_model_glm.py` | Poisson vs Negative Binomial GLM |
+| `src/5_forecast.py` | Prophet vs SARIMA walk-forward forecasting |
+| `src/check_dataset.py` | Dataset completeness and quality checks |
 
 ## Data
 
 | File | Description |
 |------|-------------|
-| `data/1_reddit_raw.csv` | Output of Step 1 — raw scraped posts/comments (keyword-filtered) |
-| `data/1_reddit_raw_1.csv` | Prior scrape backup (college/students/mentalhealth only, 35k rows, Fall 2025) |
-| `data/2_reddit_labeled.csv` | Output of Step 2 — adds `vader_label`, `roberta_label`, `is_stressed`, `needs_review` |
+| `data/2years/1_reddit_raw.csv` | Step 1 output — 138,058 raw posts (2024-2025) |
+| `data/2years/2_reddit_labeled.csv` | Step 2 output — adds is_stressed labels |
+| `data/2years/3_daily_counts.csv` | Step 3 output — 705-day daily time series |
+| `data/2years/4_irr_table.csv` | Step 4 output — IRRs from NB model |
+| `data/2years/4_model_comparison.csv` | Step 4 output — AIC/BIC comparison |
+| `data/2years/4_residuals.png` | Step 4 output — residual diagnostic plots |
+| `data/2years/5_cv_scores.csv` | Step 5 output — MAE/RMSE/MAPE per window |
+| `data/2years/5_cv_summary.csv` | Step 5 output — mean scores across windows |
+| `data/2years/5_cv_plot.png` | Step 5 output — walk-forward validation plot |
+| `data/2years/5_final_forecast.csv` | Step 5 output — 21-day Prophet forecast |
+| `data/2years/5_final_forecast.png` | Step 5 output — final forecast chart |
+| `data/1sem/` | 1-semester dataset (subset, earlier analysis) |
+
+## Docs
+
+| File | Description |
+|------|-------------|
+| `docs/step_report.html` | A4 Word-style report covering Steps 1-5 with tables and charts |
 
 ## Assessments
 
