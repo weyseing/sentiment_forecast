@@ -1,8 +1,17 @@
 """
 3_aggregate_counts.py — Daily stress count aggregation (Step 3)
 
-Takes the classified CSV (output of Step 2) and produces a 111-row
-daily time series of stress post counts — input for GLM and forecasting.
+Takes the classified CSV (output of Step 2) and produces a daily
+time series of stress post counts — input for GLM and forecasting.
+
+Features produced:
+  - Core counts: total_posts, stressed, not_stressed, needs_review, stress_rate
+  - Subreddit breakdown: stressed_college, stressed_GradSchool, stressed_mentalhealth, stressed_Students
+  - Content type: post_ratio (proportion of posts vs comments)
+  - Engagement: mean_score (all rows), mean_score_posts (posts only), mean_num_comments (posts only)
+  - Academic calendar: is_exam_period, is_semester_break
+  - Calendar: week_number, day_of_week, day_of_week_name, month, day_number
+  - Time-series: rolling_7d, z_score, is_spike
 
 Usage:
     python src/3_aggregate_counts.py --input data/2_reddit_labeled_1.csv
@@ -118,6 +127,8 @@ def main():
     print(f"\n  Rows in semester window : {len(df):,}")
 
     # ── Aggregate by day ──────────────────────────────────────────────────────
+
+    # Core counts
     daily = df.groupby('date').agg(
         total_posts=('is_stressed', 'count'),
         stressed=('is_stressed', lambda x: (x == 1).sum()),
@@ -129,13 +140,52 @@ def main():
         daily['stressed'] / (daily['stressed'] + daily['not_stressed'])
     ).round(4)
 
+    # ── Subreddit breakdown (stressed posts per subreddit per day) ────────
+    stressed_df = df[df['is_stressed'] == 1]
+    subreddit_cols = {}
+    for sub in sorted(df['subreddit'].unique()):
+        col = f"stressed_{sub}"
+        sub_daily = stressed_df[stressed_df['subreddit'] == sub].groupby('date').size()
+        subreddit_cols[col] = sub_daily
+    sub_df = pd.DataFrame(subreddit_cols).fillna(0).astype(int)
+    sub_df.index.name = 'date'
+    daily = daily.merge(sub_df, on='date', how='left')
+    for col in subreddit_cols:
+        daily[col] = daily[col].fillna(0).astype(int)
+
+    # ── Content type: post vs comment ratio ───────────────────────────────
+    post_counts = df[df['type'] == 'post'].groupby('date').size().rename('n_posts')
+    daily = daily.merge(post_counts, on='date', how='left')
+    daily['n_posts'] = daily['n_posts'].fillna(0).astype(int)
+    daily['post_ratio'] = (daily['n_posts'] / daily['total_posts']).round(4)
+    daily.drop(columns=['n_posts'], inplace=True)
+
+    # ── Engagement metrics ────────────────────────────────────────────────
+    # mean_score: average Reddit score across ALL rows (posts + comments) per day
+    score_daily = df.groupby('date')['score'].mean().rename('mean_score').round(2)
+    daily = daily.merge(score_daily, on='date', how='left')
+
+    # Posts-only engagement (num_comments is only available for posts)
+    posts_only = df[df['type'] == 'post']
+    post_engagement = posts_only.groupby('date').agg(
+        mean_score_posts=('score', 'mean'),
+        mean_num_comments=('num_comments', 'mean'),
+    ).round(2)
+    daily = daily.merge(post_engagement, on='date', how='left')
+
     # ── Fill any missing days with zeros ──────────────────────────────────────
+    daily['date'] = pd.to_datetime(daily['date'])
     all_dates = pd.DataFrame({
-        'date': [start + timedelta(n) for n in range((end - start).days + 1)]
+        'date': pd.date_range(start, end, freq='D')
     })
     daily = all_dates.merge(daily, on='date', how='left').fillna(0)
-    daily[['total_posts', 'stressed', 'not_stressed', 'needs_review']] = \
-        daily[['total_posts', 'stressed', 'not_stressed', 'needs_review']].astype(int)
+
+    # Fix integer columns after fillna
+    int_cols = ['total_posts', 'stressed', 'not_stressed', 'needs_review']
+    int_cols += [c for c in daily.columns if c.startswith('stressed_')]
+    for c in int_cols:
+        if c in daily.columns:
+            daily[c] = daily[c].astype(int)
 
     # Drop days with no scraped posts — scraper cut-off artifacts, not real zeros
     zero_days = daily[daily['total_posts'] == 0]
@@ -143,12 +193,59 @@ def main():
         print(f"  Dropped {len(zero_days)} day(s) with no scraped posts: {zero_days['date'].tolist()}")
         daily = daily[daily['total_posts'] > 0].reset_index(drop=True)
 
+    # ── Academic calendar flags (multi-region) ───────────────────────────
+    # Covers 4 major English-speaking higher education systems whose
+    # students dominate the studied subreddits.  Flag = 1 if ANY region
+    # has exams or break on that date.
+    #
+    # Sources:
+    #   US/Canada — semester system (dominant on r/college, r/GradSchool)
+    #     Exam periods : Apr 25 – May 15 (spring finals), Dec 1 – Dec 20 (fall finals)
+    #     Breaks       : Jun 1 – Aug 15 (summer), Dec 21 – Jan 5 (winter holiday)
+    #   UK — term system (significant presence on r/Students)
+    #     Exam periods : Jan 10 – Jan 31 (winter exams), May 10 – Jun 20 (summer exams)
+    #     Breaks       : Jun 21 – Sep 15 (summer), Dec 15 – Jan 9 (Christmas)
+    #   Australia — southern-hemisphere semester system
+    #     Exam periods : Jun 1 – Jun 25 (Sem 1 exams), Oct 20 – Nov 20 (Sem 2 exams)
+    #     Breaks       : Nov 21 – Feb 20 (summer), Jul 1 – Jul 20 (mid-year)
+    #
+    # The union approach ensures that on any given day, if students from
+    # at least one major region are under exam stress or on break, the
+    # flag is active — reflecting the mixed international composition
+    # of the subreddits.
+
+    md = daily['date'].dt.month * 100 + daily['date'].dt.day  # MMDD
+
+    daily['is_exam_period'] = (
+        # US / Canada
+        ((md >= 425) & (md <= 515)) |    # Spring finals
+        ((md >= 1201) & (md <= 1220)) |  # Fall finals
+        # UK
+        ((md >= 110) & (md <= 131)) |    # Winter exams
+        ((md >= 510) & (md <= 620)) |    # Summer exams
+        # Australia
+        ((md >= 601) & (md <= 625)) |    # Sem 1 exams
+        ((md >= 1020) & (md <= 1120))    # Sem 2 exams
+    ).astype(int)
+
+    daily['is_semester_break'] = (
+        # US / Canada
+        ((md >= 601) & (md <= 815)) |    # Summer break
+        ((md >= 1221) | (md <= 105)) |   # Winter holiday
+        # UK
+        ((md >= 621) & (md <= 915)) |    # Summer break
+        ((md >= 1215) & (md <= 109)) |   # Christmas break
+        # Australia
+        ((md >= 1121) | (md <= 220)) |   # Southern-hemisphere summer
+        ((md >= 701) & (md <= 720))      # Mid-year break
+    ).astype(int)
+
     # ── Calendar features ─────────────────────────────────────────────────────
-    daily['date'] = pd.to_datetime(daily['date'])
     daily['week_number'] = daily['date'].dt.isocalendar().week.astype(int)
     daily['day_of_week'] = daily['date'].dt.dayofweek          # 0=Mon
     daily['day_of_week_name'] = daily['date'].dt.day_name()
-    daily['day_number'] = range(1, len(daily) + 1)             # 1–111 for GLM
+    daily['month'] = daily['date'].dt.month
+    daily['day_number'] = range(1, len(daily) + 1)             # sequential for GLM
 
     # ── Time-series features ───────────────────────────────────────────────────
     s_vals = daily['stressed'].astype(float)

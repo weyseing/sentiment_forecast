@@ -90,38 +90,65 @@ def build_academic_events(start_year=2024, end_year=2026):
     """
     Build a DataFrame of recurring academic calendar events for Prophet.
 
-    These events reflect the North American university calendar, which is
-    the dominant context for the four subreddits studied (r/college,
-    r/Students, r/GradSchool, r/mentalhealth with student filters).
+    Covers 4 major English-speaking higher education systems whose
+    students dominate the studied subreddits (r/college, r/Students,
+    r/GradSchool, r/mentalhealth with student-context filters):
 
-    Events included:
-      - fall_exam_period   : Nov 15 – Dec 20  (final exams + end-of-semester)
-      - winter_holiday     : Dec 21 – Jan 5   (year-end holiday break)
-      - spring_semester_start : Jan 6 – Jan 20 (new semester stress)
-      - spring_exam_period : Apr 15 – May 15  (spring finals)
-      - summer_break       : Jun 1  – Aug 15  (low-activity inter-semester)
+      US / Canada (semester system):
+        - us_spring_finals     : Apr 25 – May 15
+        - us_fall_finals       : Dec 1 – Dec 20
+        - us_winter_holiday    : Dec 21 – Jan 5
+        - us_summer_break      : Jun 1 – Aug 15
 
-    The window parameter in Prophet controls how many days around the
-    event date the model treats as "affected" — set to 1 here because
-    the events are already defined as date ranges via repeated rows.
+      UK (term system):
+        - uk_winter_exams      : Jan 10 – Jan 31
+        - uk_summer_exams      : May 10 – Jun 20
+        - uk_summer_break      : Jun 21 – Sep 15
+        - uk_christmas_break   : Dec 15 – Jan 9
+
+      Australia (southern-hemisphere semester system):
+        - au_sem1_exams        : Jun 1 – Jun 25
+        - au_sem2_exams        : Oct 20 – Nov 20
+        - au_summer_break      : Nov 21 – Feb 20
+        - au_midyear_break     : Jul 1 – Jul 20
+
+    The union of these calendars ensures the model accounts for stress
+    peaks from any major English-speaking student population present
+    in the subreddits.
     """
+    # (event_name, month_start, day_start, month_end, day_end, wraps_year)
+    events = [
+        # US / Canada
+        ("us_spring_finals",    4, 25,  5, 15, False),
+        ("us_fall_finals",     12,  1, 12, 20, False),
+        ("us_winter_holiday",  12, 21,  1,  5, True),
+        ("us_summer_break",     6,  1,  8, 15, False),
+        # UK
+        ("uk_winter_exams",     1, 10,  1, 31, False),
+        ("uk_summer_exams",     5, 10,  6, 20, False),
+        ("uk_summer_break",     6, 21,  9, 15, False),
+        ("uk_christmas_break", 12, 15,  1,  9, True),
+        # Australia
+        ("au_sem1_exams",       6,  1,  6, 25, False),
+        ("au_sem2_exams",      10, 20, 11, 20, False),
+        ("au_summer_break",    11, 21,  2, 20, True),
+        ("au_midyear_break",    7,  1,  7, 20, False),
+    ]
+
     rows = []
     for year in range(start_year, end_year + 1):
-        # Fall exam / end-of-semester stress peak (Nov 15 – Dec 20)
-        for d in pd.date_range(f"{year}-11-15", f"{year}-12-20"):
-            rows.append({"holiday": "fall_exam_period",   "ds": d, "lower_window": 0, "upper_window": 0})
-        # Year-end holiday break — activity dip (Dec 21 – Jan 5 of next year)
-        for d in pd.date_range(f"{year}-12-21", f"{year+1}-01-05"):
-            rows.append({"holiday": "winter_holiday",     "ds": d, "lower_window": 0, "upper_window": 0})
-        # Spring semester start — adjustment stress (Jan 6 – Jan 20)
-        for d in pd.date_range(f"{year}-01-06", f"{year}-01-20"):
-            rows.append({"holiday": "spring_semester_start", "ds": d, "lower_window": 0, "upper_window": 0})
-        # Spring finals (Apr 15 – May 15)
-        for d in pd.date_range(f"{year}-04-15", f"{year}-05-15"):
-            rows.append({"holiday": "spring_exam_period", "ds": d, "lower_window": 0, "upper_window": 0})
-        # Summer break — lowest activity (Jun 1 – Aug 15)
-        for d in pd.date_range(f"{year}-06-01", f"{year}-08-15"):
-            rows.append({"holiday": "summer_break",       "ds": d, "lower_window": 0, "upper_window": 0})
+        for name, ms, ds, me, de, wraps in events:
+            try:
+                if wraps:
+                    date_range = pd.date_range(f"{year}-{ms}-{ds}", f"{year+1}-{me}-{de}")
+                else:
+                    date_range = pd.date_range(f"{year}-{ms}-{ds}", f"{year}-{me}-{de}")
+                for d in date_range:
+                    rows.append({"holiday": name, "ds": d,
+                                 "lower_window": 0, "upper_window": 0})
+            except ValueError:
+                pass
+
     return pd.DataFrame(rows).drop_duplicates(subset=["holiday", "ds"])
 
 
@@ -140,18 +167,18 @@ def analyze_yearly_pattern(df, output_path):
     monthly.columns = ["year", "month", "mean_stressed"]
 
     period_label = {
-        1: "Post-exam / winter holiday",
-        2: "Spring semester",
-        3: "Spring semester",
-        4: "Spring semester",
-        5: "Spring exam period",
-        6: "Summer break",
-        7: "Summer break",
-        8: "Summer break",
-        9: "Fall semester start",
-        10: "Fall semester (peak)",
-        11: "Fall exam period",
-        12: "Fall exam period",
+        1: "UK winter exams / US-UK winter break",
+        2: "Spring semester (US/UK/AU)",
+        3: "Spring semester (US/UK/AU)",
+        4: "Spring semester (US/UK/AU)",
+        5: "Exams: US spring finals + UK summer exams",
+        6: "Exams: UK summer + AU Sem 1 / US-UK break starts",
+        7: "Break: US/UK summer + AU mid-year",
+        8: "Break: US/UK summer",
+        9: "Fall semester start (US/UK)",
+        10: "AU Sem 2 exams / US-UK fall semester",
+        11: "AU Sem 2 exams / US-UK fall semester",
+        12: "US/CA fall finals / AU-UK break starts",
     }
     month_names = {1:"Jan",2:"Feb",3:"Mar",4:"Apr",5:"May",6:"Jun",
                    7:"Jul",8:"Aug",9:"Sep",10:"Oct",11:"Nov",12:"Dec"}
@@ -172,20 +199,44 @@ def analyze_yearly_pattern(df, output_path):
                 marker="o", linewidth=2, label=str(year),
                 color=colors.get(year, "gray"))
 
-    # Shade academic periods
-    exam_months   = [11, 12]
-    holiday_months = [1]
-    spring_months  = [4, 5]
-    summer_months  = [6, 7, 8]
+    # Shade multi-region academic periods (2 colors: exam=red, break=blue)
+    # Each span: (month_start, month_end, type, region_label)
+    # Months are approximate since this chart shows monthly granularity
+    exam_color  = "#e74c3c"
+    break_color = "#3498db"
 
-    for span, color, label in [
-        (exam_months,    "#ff9999", "Fall exam period"),
-        (holiday_months, "#99b3ff", "Post-holiday / new semester"),
-        (spring_months,  "#ffcc88", "Spring exam period"),
-        (summer_months,  "#88dd88", "Summer break"),
-    ]:
-        ax.axvspan(min(span) - 0.5, max(span) + 0.5, alpha=0.45,
-                   color=color, label=label, zorder=0)
+    multi_region_spans = [
+        # Exams
+        (11.5, 12.5, "exam",  "US/CA"),     # US/CA fall finals (Dec)
+        ( 0.5,  1.5, "exam",  "UK"),         # UK winter exams (Jan)
+        ( 4.5,  5.5, "exam",  "US/CA"),      # US/CA spring finals (May)
+        ( 4.5,  6.5, "exam",  "UK"),         # UK summer exams (May–Jun)
+        ( 5.5,  6.5, "exam",  "AU"),         # AU Sem 1 exams (Jun)
+        ( 9.5, 11.5, "exam",  "AU"),         # AU Sem 2 exams (Oct–Nov)
+        # Breaks
+        (12.5, 13.0, "break", "US/UK"),      # Winter holiday (late Dec → Jan)
+        ( 0.5,  1.0, "break", "US/UK"),      # Winter holiday (Jan portion)
+        ( 5.5,  8.5, "break", "US/UK"),      # US/UK summer break (Jun–Aug)
+        ( 6.5,  7.5, "break", "AU"),         # AU mid-year break (Jul)
+    ]
+
+    exam_labeled = False
+    break_labeled = False
+    for m_start, m_end, etype, region in multi_region_spans:
+        color = exam_color if etype == "exam" else break_color
+        if etype == "exam" and not exam_labeled:
+            lbl = "Exam period"
+            exam_labeled = True
+        elif etype == "break" and not break_labeled:
+            lbl = "Semester break"
+            break_labeled = True
+        else:
+            lbl = "_nolegend_"
+        ax.axvspan(m_start, m_end, alpha=0.12, color=color, label=lbl, zorder=0)
+        # Region label at top
+        ax.text((m_start + m_end) / 2, 0.96, region, ha="center", va="top",
+                fontsize=7, color=color, alpha=0.8, fontweight="bold",
+                transform=ax.get_xaxis_transform())
 
     ax.set_xticks(range(1, 13))
     ax.set_xticklabels(["Jan","Feb","Mar","Apr","May","Jun",
@@ -193,7 +244,7 @@ def analyze_yearly_pattern(df, output_path):
     ax.set_xlabel("Month")
     ax.set_ylabel("Mean stressed posts / day")
     ax.set_title("Yearly Seasonality — Monthly Average Stressed Posts\n"
-                 "(Academic calendar events shaded)", fontsize=12, fontweight="bold")
+                 "(Multi-region academic calendar: US/Canada, UK, Australia)", fontsize=12, fontweight="bold")
     ax.legend(fontsize=9, loc="upper left")
     ax.grid(True, alpha=0.3)
 
@@ -430,39 +481,72 @@ def plot_final_forecast(df, prophet_forecast, horizon, output_path):
     all_dates_min = df["date"].min()
     all_dates_max = fc["ds"].max() if len(fc) > 0 else df["date"].max()
 
+    # Two-color scheme: red = exam stress, blue = break/low activity
+    # Region shown via text annotation inside each band (not legend)
+    # Stacked vertically by region so overlaps don't hide each other
     academic_shading = [
-        # (month_start, day_start, month_end, day_end, color, label)
-        (11, 15, 12, 20, "#ff9999", "Fall exam period (Nov 15–Dec 20)"),
-        (12, 21, 1,  5,  "#99b3ff", "Winter holiday (Dec 21–Jan 5)"),
-        ( 4, 15, 5,  15, "#ffcc88", "Spring exam period (Apr 15–May 15)"),
-        ( 6,  1, 8,  15, "#88dd88", "Summer break (Jun–Aug)"),
+        # (month_start, day_start, month_end, day_end, type, region_label)
+        # Exams (red tones)
+        (12,  1, 12, 20, "exam",  "US/CA"),
+        ( 1, 10,  1, 31, "exam",  "UK"),
+        ( 4, 25,  5, 15, "exam",  "US/CA"),
+        ( 5, 10,  6, 20, "exam",  "UK"),
+        ( 6,  1,  6, 25, "exam",  "AU"),
+        (10, 20, 11, 20, "exam",  "AU"),
+        # Breaks (blue tones)
+        (12, 21,  1,  9, "break", "US/UK"),
+        ( 6, 21,  8, 15, "break", "US/UK"),
+        ( 7,  1,  7, 20, "break", "AU"),
+        (11, 21,  2, 20, "break", "AU"),
     ]
 
-    labeled = set()
+    exam_color  = "#e74c3c"   # red
+    break_color = "#3498db"   # blue
+
+    # Track legend entries
+    exam_labeled = False
+    break_labeled = False
+
     for year in range(all_dates_min.year, all_dates_max.year + 2):
-        for ms, ds, me, de, color, label in academic_shading:
+        for ms, ds, me, de, etype, region in academic_shading:
             try:
                 if ms <= me:
                     span_start = pd.Timestamp(year, ms, ds)
                     span_end   = pd.Timestamp(year, me, de)
                 else:
-                    # Wraps year boundary (Dec → Jan next year)
                     span_start = pd.Timestamp(year,   ms, ds)
                     span_end   = pd.Timestamp(year+1, me, de)
-                # Clip to chart range
                 span_start = max(span_start, all_dates_min)
                 span_end   = min(span_end,   all_dates_max)
                 if span_start >= span_end:
                     continue
-                lbl = label if label not in labeled else "_nolegend_"
-                ax.axvspan(span_start, span_end, alpha=0.30, color=color,
+
+                color = exam_color if etype == "exam" else break_color
+                alpha = 0.15
+
+                # Legend: one entry per type
+                if etype == "exam" and not exam_labeled:
+                    lbl = "Exam period"
+                    exam_labeled = True
+                elif etype == "break" and not break_labeled:
+                    lbl = "Semester break"
+                    break_labeled = True
+                else:
+                    lbl = "_nolegend_"
+
+                ax.axvspan(span_start, span_end, alpha=alpha, color=color,
                            label=lbl, zorder=0)
-                labeled.add(label)
+
+                # Small region label at top of band (use axes transform for y)
+                mid = span_start + (span_end - span_start) / 2
+                ax.text(mid, 0.96, region, ha="center", va="top",
+                        fontsize=6, color=color, alpha=0.8, fontweight="bold",
+                        transform=ax.get_xaxis_transform())
             except ValueError:
                 pass
 
     ax.set_title("Final Prophet Forecast — Trained on Full Dataset\n"
-                 "(Academic calendar periods shaded)", fontsize=13, fontweight="bold")
+                 "(Multi-region academic calendar: US/Canada, UK, Australia)", fontsize=13, fontweight="bold")
     ax.set_xlabel("Date")
     ax.set_ylabel("Stressed posts/day")
     ax.legend(fontsize=8, loc="upper left", ncol=2)

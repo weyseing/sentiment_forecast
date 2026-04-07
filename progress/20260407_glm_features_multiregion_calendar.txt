@@ -1,0 +1,45 @@
+2026-04-07 — Expanded GLM Features + Multi-Region Academic Calendar
+
+Supervisor feedback: Step 4 GLM had too few features. She proposed adding gender, region, age.
+
+Problem: Reddit is anonymous — no demographic data available.
+
+What we did instead:
+
+1. Step 3 (3_aggregate_counts.py) — Added 11 new daily features:
+   - Subreddit breakdown: stressed_college, stressed_GradSchool, stressed_mentalhealth, stressed_Students
+   - Content type: post_ratio (posts vs comments proportion)
+   - Engagement: mean_score, mean_score_posts, mean_num_comments
+   - Academic calendar: is_exam_period, is_semester_break (multi-region)
+   - Calendar: month
+
+2. Step 4 (4_model_glm.py) — Expanded GLM formula:
+   stressed ~ week_number + day_of_week + is_exam_period + is_semester_break
+             + post_ratio + mean_score + mean_num_comments
+             + prop_GradSchool + prop_Students + prop_mentalhealth
+   Reference categories: Monday (day), prop_college (subreddit)
+
+3. Multi-region academic calendar (Steps 3 + 5):
+   - Replaced US-only hardcoded dates with union of US/Canada, UK, Australia
+   - Supervisor asked: "Where does holiday/exam period info come from? US only?"
+   - Now covers 3 major English-speaking higher ed systems
+   - Step 5 Prophet holidays: 12 event types (was 5)
+   - Step 5 SARIMAX: matching binary exogenous regressors per region
+
+4. Step 5 (5_forecast.py) — Updated plots:
+   - 2-color scheme: red=exam, blue=break (was 7 overlapping colors)
+   - Region labels (US/CA, UK, AU) annotated inside each band
+   - Both 5_final_forecast.png and 5_yearly_pattern.png updated
+
+Key GLM results (NB model, significant features):
+   is_exam_period    IRR=1.072***  (+7.2% stress during exams)
+   is_semester_break IRR=0.889***  (-11.1% during breaks)
+   post_ratio        IRR=0.460***  (comment-heavy days = more stress)
+   mean_score        IRR=1.007***  (engagement effect)
+   prop_mentalhealth IRR=0.555***  (strict student filter effect)
+   Fri/Sat/Sun       IRR=0.877/0.820/0.873***  (weekend dip holds)
+
+Forecast results unchanged: SARIMA wins overall (MAE 21.61), Prophet wins Window 4 (MAE 9.8).
+
+Files changed: src/3_aggregate_counts.py, src/4_model_glm.py, src/5_forecast.py
+Files regenerated: data/2years/3_daily_counts.csv (now 25 cols), all Step 4 + Step 5 outputs

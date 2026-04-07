@@ -76,13 +76,37 @@ def main():
         ordered=False,
     )
 
-    # week_number: continuous predictor capturing long-term trend across 2 years
-    # day_number excluded: collinear with week_number (day_number = week_number * 7 ± offset)
-    formula = "stressed ~ week_number + C(day_of_week_name, Treatment('Monday'))"
-    print(f"  Formula : {formula}")
-    print(f"  Predictors — week_number (trend) + day_of_week (seasonality)")
-    print(f"  Reference category — day_of_week: 'Monday'")
-    print(f"  Note: day_number excluded (collinear with week_number)")
+    # Subreddit proportions (more stable than raw counts — avoids collinearity with total)
+    subreddit_stressed_cols = [c for c in df.columns if c.startswith("stressed_")]
+    for col in subreddit_stressed_cols:
+        prop_col = col.replace("stressed_", "prop_")
+        df[prop_col] = (df[col] / df["stressed"].replace(0, np.nan)).fillna(0).round(4)
+
+    # Print available features
+    new_features = [
+        "post_ratio", "mean_score", "mean_score_posts", "mean_num_comments",
+        "is_exam_period", "is_semester_break", "month",
+    ] + [c for c in df.columns if c.startswith("prop_")]
+    print(f"  Available new features:")
+    for feat in new_features:
+        if feat in df.columns:
+            print(f"    {feat:<25} min={df[feat].min():.2f}  max={df[feat].max():.2f}  mean={df[feat].mean():.2f}")
+
+    # Formula — expanded with subreddit composition, engagement, and academic calendar
+    # Reference categories: day_of_week='Monday'
+    # prop_college excluded as reference (proportions sum to ~1, avoiding multicollinearity)
+    prop_terms = [c for c in df.columns if c.startswith("prop_") and c != "prop_college"]
+    formula = (
+        "stressed ~ week_number"
+        " + C(day_of_week_name, Treatment('Monday'))"
+        " + is_exam_period + is_semester_break"
+        " + post_ratio + mean_score + mean_num_comments"
+        " + " + " + ".join(prop_terms)
+    )
+    print(f"\n  Formula:\n    {formula}")
+    print(f"\n  Reference categories:")
+    print(f"    day_of_week: Monday")
+    print(f"    subreddit:   prop_college (excluded to avoid collinearity)")
 
     # ── 4. Fit Poisson GLM ────────────────────────────────────────────────────
     section("4. FIT POISSON GLM")
@@ -94,7 +118,7 @@ def main():
     # smf.negativebinomial() properly estimates the dispersion parameter (alpha)
     # from the data via MLE, unlike smf.glm(..., NegativeBinomial()) which
     # requires alpha to be pre-specified.
-    nb_model = smf.negativebinomial(formula=formula, data=df).fit(disp=False)
+    nb_model = smf.negativebinomial(formula=formula, data=df).fit(disp=False, maxiter=200)
     print(nb_model.summary())
 
     # ── 6. Model comparison ───────────────────────────────────────────────────
