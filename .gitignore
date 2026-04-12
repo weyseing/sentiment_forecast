@@ -4,6 +4,7 @@ __pycache__/
 *.pyo
 *.csv
 *.png
+!data/2years/*.png
 
 # macOS
 .DS_Store
