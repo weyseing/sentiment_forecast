@@ -1,0 +1,99 @@
+<svg width="610" height="490" viewBox="0 0 610 490" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <!-- Arrow marker — orient="auto" rotates to match line direction -->
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+    </marker>
+    <!-- Clip paths for rounded-rect headers -->
+    <clipPath id="cf-input">  <rect x="198" y="15"  width="214" height="44" rx="5"/></clipPath>
+    <clipPath id="cf-vader">  <rect x="75"  y="90"  width="160" height="78" rx="5"/></clipPath>
+    <clipPath id="cf-roberta"><rect x="375" y="90"  width="160" height="78" rx="5"/></clipPath>
+    <clipPath id="cf-not">    <rect x="10"  y="238" width="138" height="68" rx="5"/></clipPath>
+    <clipPath id="cf-stress"> <rect x="452" y="238" width="148" height="68" rx="5"/></clipPath>
+    <clipPath id="cf-review"> <rect x="170" y="372" width="270" height="88" rx="5"/></clipPath>
+  </defs>
+
+  <!-- ══ INPUT BOX ══ -->
+  <rect x="198" y="15"  width="214" height="44" rx="5" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="198" y="15"  width="214" height="22" fill="#1e3a5f" clip-path="url(#cf-input)"/>
+  <text x="305" y="30"  text-anchor="middle" fill="white"   font-size="10" font-weight="bold">Post Text (138,058 records)</text>
+  <text x="305" y="50"  text-anchor="middle" fill="#334155" font-size="9">Combined title + body, max 512 tokens</text>
+
+  <!-- Split from input: vertical down, then horizontal branch -->
+  <line x1="305" y1="59"  x2="305" y2="85"  stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="155" y1="85"  x2="455" y2="85"  stroke="#94a3b8" stroke-width="1.5"/>
+  <!-- Down to VADER -->
+  <line x1="155" y1="85"  x2="155" y2="88"  stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  <!-- Down to RoBERTa -->
+  <line x1="455" y1="85"  x2="455" y2="88"  stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ══ VADER BOX ══ -->
+  <rect x="75"  y="90"  width="160" height="78" rx="5" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="75"  y="90"  width="160" height="22" fill="#334155" clip-path="url(#cf-vader)"/>
+  <text x="155" y="105" text-anchor="middle" fill="white"   font-size="9.5" font-weight="bold">VADER</text>
+  <text x="155" y="124" text-anchor="middle" fill="#1e3a5f" font-size="9"   font-weight="bold">Lexicon-based</text>
+  <text x="155" y="138" text-anchor="middle" fill="#475569" font-size="9">Negative score ≥ 0.05</text>
+  <text x="155" y="152" text-anchor="middle" fill="#475569" font-size="9">Label: 0 or 1</text>
+
+  <!-- ══ RoBERTa BOX ══ -->
+  <rect x="375" y="90"  width="160" height="78" rx="5" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="375" y="90"  width="160" height="22" fill="#334155" clip-path="url(#cf-roberta)"/>
+  <text x="455" y="105" text-anchor="middle" fill="white"   font-size="9.5" font-weight="bold">RoBERTa</text>
+  <text x="455" y="124" text-anchor="middle" fill="#1e3a5f" font-size="9"   font-weight="bold">Transformer-based</text>
+  <text x="455" y="138" text-anchor="middle" fill="#475569" font-size="9">twitter-roberta-base</text>
+  <text x="455" y="152" text-anchor="middle" fill="#475569" font-size="9">Label: 0 or 1</text>
+
+  <!-- Merge lines from VADER + RoBERTa bottom to diamond -->
+  <line x1="155" y1="168" x2="155" y2="210" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="455" y1="168" x2="455" y2="210" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="155" y1="210" x2="455" y2="210" stroke="#94a3b8" stroke-width="1.5"/>
+  <!-- Arrow from merge down into diamond -->
+  <line x1="305" y1="210" x2="305" y2="229" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ══ DECISION DIAMOND ══ -->
+  <!-- Points: top(305,232) right(397,270) bottom(305,308) left(213,270) -->
+  <polygon points="305,232 397,270 305,308 213,270"
+           fill="#fefce8" stroke="#92400e" stroke-width="1.5"/>
+  <text x="305" y="264" text-anchor="middle" fill="#78350f" font-size="9.5" font-weight="bold">Both models</text>
+  <text x="305" y="279" text-anchor="middle" fill="#78350f" font-size="9.5" font-weight="bold">agree?</text>
+
+  <!-- ══ LEFT ARROW → Not Stressed ══ -->
+  <!-- Line from diamond left point (213,270) going left to box right edge -->
+  <line x1="213" y1="270" x2="151" y2="270" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="182" y="263" text-anchor="middle" fill="#475569" font-size="8">Both = 0</text>
+
+  <!-- ══ RIGHT ARROW → Stressed ══ -->
+  <!-- Line from diamond right point (397,270) going right to box left edge -->
+  <line x1="397" y1="270" x2="449" y2="270" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="423" y="263" text-anchor="middle" fill="#475569" font-size="8">Both = 1</text>
+
+  <!-- ══ DOWN ARROW → Needs Review ══ -->
+  <!-- Line from diamond bottom (305,308) going down -->
+  <line x1="305" y1="308" x2="305" y2="369" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="314" y="342" text-anchor="start" fill="#475569" font-size="8">Disagree</text>
+
+  <!-- ══ NOT STRESSED BOX ══ (blue) -->
+  <rect x="10"  y="238" width="138" height="68" rx="5" fill="#eff6ff" stroke="#1d4ed8" stroke-width="1.5"/>
+  <rect x="10"  y="238" width="138" height="22" fill="#1d4ed8" clip-path="url(#cf-not)"/>
+  <text x="79"  y="253" text-anchor="middle" fill="white"   font-size="9.5" font-weight="bold">Not Stressed</text>
+  <text x="79"  y="273" text-anchor="middle" fill="#1e3a8a" font-size="9"   font-weight="bold">is_stressed = 0</text>
+  <text x="79"  y="287" text-anchor="middle" fill="#374151" font-size="9">26,739 records</text>
+  <text x="79"  y="299" text-anchor="middle" fill="#374151" font-size="9">(19.4%)</text>
+
+  <!-- ══ STRESSED BOX ══ (green) -->
+  <rect x="452" y="238" width="148" height="68" rx="5" fill="#f0fdf4" stroke="#15803d" stroke-width="1.5"/>
+  <rect x="452" y="238" width="148" height="22" fill="#15803d" clip-path="url(#cf-stress)"/>
+  <text x="526" y="253" text-anchor="middle" fill="white"   font-size="9.5" font-weight="bold">Stressed</text>
+  <text x="526" y="273" text-anchor="middle" fill="#14532d" font-size="9"   font-weight="bold">is_stressed = 1</text>
+  <text x="526" y="287" text-anchor="middle" fill="#374151" font-size="9">70,788 records</text>
+  <text x="526" y="299" text-anchor="middle" fill="#374151" font-size="9">(51.3%)</text>
+
+  <!-- ══ NEEDS REVIEW BOX ══ (amber) -->
+  <rect x="170" y="372" width="270" height="90" rx="5" fill="#fffbeb" stroke="#b45309" stroke-width="1.5"/>
+  <rect x="170" y="372" width="270" height="22" fill="#b45309" clip-path="url(#cf-review)"/>
+  <text x="305" y="387" text-anchor="middle" fill="white"   font-size="9.5" font-weight="bold">Needs Manual Review</text>
+  <text x="305" y="408" text-anchor="middle" fill="#78350f" font-size="9"   font-weight="bold">is_stressed = &#x2212;1 &amp;  needs_review = 1</text>
+  <text x="305" y="423" text-anchor="middle" fill="#374151" font-size="9">40,531 records (29.4%)</text>
+  <text x="305" y="438" text-anchor="middle" fill="#374151" font-size="9">Excluded from all analysis</text>
+  <text x="305" y="453" text-anchor="middle" fill="#374151" font-size="9">(conservative design — scale precludes review)</text>
+</svg>

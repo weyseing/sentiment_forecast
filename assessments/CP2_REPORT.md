@@ -248,4 +248,100 @@ This study explicitly addresses the integration, hybrid classification, temporal
 
 ---
 
+## 3. Methodology
+
+### 3.1 Research Design and Pipeline Overview
+
+This study adopted a quantitative, longitudinal, and observational research design. No direct interaction with human participants was involved; all analyses were conducted on publicly available, archival social media data. The research was structured as a five-stage computational pipeline, with each stage producing a structured output that served as the input for the next. The five stages were: (1) data collection from Reddit via the Arctic Shift API; (2) hybrid NLP sentiment classification using VADER and RoBERTa; (3) daily stress count aggregation with derived temporal and academic calendar features; (4) Negative Binomial generalised linear modelling to identify significant predictors of daily stress volumes; and (5) comparative time-series forecasting using Prophet and SARIMA with walk-forward cross-validation.
+
+This pipeline design reflects the integration gap identified in the literature review: prior work has addressed each of these stages in isolation, but rarely within a single, end-to-end framework (Sattar et al., 2025; Weng et al., 2025). By connecting NLP classification outputs directly to statistical modelling and forecasting stages, the pipeline enables assessment of how classification decisions propagate through to predictive performance and whether the addition of count regression adds explanatory value beyond direct time-series modelling of raw counts.
+
+![Figure 3.1](figures/fig3_1_pipeline.svg)
+
+*Figure 3.1.* Five-Stage Research Pipeline from Raw Reddit Data to 21-Day Stress Forecasts.
+
+### 3.2 Data Collection
+
+Reddit data were collected using the Arctic Shift API (`arctic-shift.photon-reddit.com/api`), a publicly accessible historical archive of Reddit content that requires no authentication key and supports retrospective collection across user-specified subreddits and time windows. The use of an archival API, rather than the live Reddit API, enabled collection of complete historical records across the full two-year study period without rate-limiting constraints that would have truncated longitudinal coverage.
+
+Four subreddits were targeted: r/college, r/Students, r/GradSchool, and r/mentalhealth. These were selected to capture a range of student experiences and academic contexts. The r/college and r/Students subreddits represent general undergraduate discourse, r/GradSchool captures postgraduate-specific pressures including thesis stress and supervisory relationships, and r/mentalhealth provides a dedicated space for explicit mental health discussions. Both posts and comments were collected to maximise signal density; Reddit comments frequently contain substantive emotional disclosure that is absent from the shorter post titles that head each thread.
+
+The collection window spanned 15 January 2024 to 21 December 2025, covering two complete academic years across the Northern Hemisphere semester calendar. Data were retrieved in pages of 100 records per API request, with a one-second delay between requests to respect server load. Interrupted sessions were recoverable by appending new pages to the existing output file and skipping already-retrieved record identifiers.
+
+A two-stage keyword filter was applied during collection. In Stage 1, all four subreddits were filtered to retain only records containing at least one of 30 stress-related keywords, including terms such as "stress", "anxiety", "overwhelmed", "burnout", "panic", "failing", "sleep deprived", and "giving up". This broad filter was intentionally inclusive to avoid false negatives at the collection stage, with precise classification delegated to the NLP stage. In Stage 2, r/mentalhealth required an additional match against a 28-term student-context keyword list containing terms such as "university", "semester", "exam", "professor", "campus", "thesis", and "GPA". This secondary filter was necessary because pilot scraping without it yielded approximately 85% of r/mentalhealth records from non-student users discussing general-population mental health concerns unrelated to academic stress. The filter was applied only to r/mentalhealth; the other three subreddits are structurally academic communities where all posts are assumed to originate from a student context.
+
+The final raw dataset comprised **138,058 records** (68,217 posts and 69,841 comments) stored in `data/2years/1_reddit_raw.csv`. Each record contained a unique identifier, subreddit, content type, title (posts only), body text, author pseudonym, score, upvote ratio, comment count (posts only), timestamp in UTC, and permalink.
+
+### 3.3 NLP Sentiment Classification
+
+Each record was classified as stressed (label = 1), not stressed (label = 0), or requiring manual review (label = −1) using a hybrid approach that combined a lexicon-based model with a transformer-based model. The hybrid design was motivated by the limitations of each paradigm in isolation: VADER misses context and sarcasm, while RoBERTa sacrifices interpretability and is computationally expensive (Hutto & Gilbert, 2014; Liu et al., 2019). Using both models in parallel and treating their agreement as a confidence signal addresses both concerns simultaneously.
+
+**VADER classification.** The VADER SentimentIntensityAnalyzer was applied to each record's combined title and body text. VADER produces four scores — positive, negative, neutral, and compound — from a predefined sentiment lexicon calibrated for social media language. For this study, a record was classified as stressed (VADER label = 1) if its negative sentiment score met or exceeded a threshold of 0.05, a threshold chosen to prioritise sensitivity over specificity at this stage, given that the hybrid decision logic uses both models' outputs jointly. Records below this threshold received a VADER label of 0.
+
+**RoBERTa classification.** The transformer model `cardiffnlp/twitter-roberta-base-sentiment-latest` was applied to the same text fields. This model was pre-trained on a large Twitter corpus and fine-tuned for three-class sentiment classification (negative, neutral, positive), making it well-suited for short-form, informal social media text. Inference was conducted in batches of 32 records using the Hugging Face `transformers` pipeline interface, with text truncated to a maximum of 512 tokens to respect the model's input limit. Records classified as "negative" received a RoBERTa label of 1; all other outputs received a label of 0. Inference was performed on CPU with batch-by-batch output appended to disk, enabling safe interruption and resumption of long inference runs.
+
+**Hybrid decision logic.** The final stress label was determined by the agreement between the two models:
+
+- If both models assigned label = 1, the record was classified as stressed (`is_stressed = 1`), representing a high-confidence positive case.
+- If both models assigned label = 0, the record was classified as not stressed (`is_stressed = 0`), representing a high-confidence negative case.
+- If the models disagreed, the record was assigned `is_stressed = −1` and flagged with `needs_review = 1`. These discordant cases were excluded from all subsequent analysis. At a scale of 40,531 records, individual manual review was not feasible within the scope of this project. Excluding rather than arbitrarily resolving disagreements represents a conservative design choice: only classifications supported by both models are treated as high-confidence labels, reducing the risk of including mislabelled records in the daily stress counts.
+
+![Figure 3.2](figures/fig3_2_nlp_flowchart.svg)
+
+*Figure 3.2.* Hybrid VADER–RoBERTa Classification Decision Logic and Outcome Distribution.
+
+Of the 138,058 records, **70,788 (51.3%)** were concordantly classified as stressed, **26,739 (19.4%)** as not stressed, and **40,531 (29.4%)** were flagged as needing review. The high concordance rate for stressed classifications reflects the success of the Stage 1 keyword filter in pre-selecting posts likely to contain genuine distress signals. Subreddit-level breakdown of confirmed stressed posts showed that r/mentalhealth contributed the largest share (36,856), followed by r/college (25,542), r/GradSchool (8,055), and r/Students (335). The low count from r/Students likely reflects the smaller and less active nature of that community relative to the other three during the study period.
+
+### 3.4 Daily Count Aggregation
+
+The labeled dataset was aggregated into a daily time series by grouping records by their UTC date and summing counts of stressed, not stressed, and needs-review labels per day. Days on which the scraper recorded zero total posts — which arose from API cut-off artefacts at the boundaries of the collection window rather than genuine zero-activity days — were dropped from the output. This yielded a final time series of **705 days** spanning 15 January 2024 to 19 December 2025, stored in `data/2years/3_daily_counts.csv`.
+
+Beyond core stress counts, the aggregation script computed a set of derived features used as covariates in the GLM stage. Subreddit composition was captured as daily proportions of stressed posts originating from each subreddit (e.g., `prop_mentalhealth`, `prop_GradSchool`), calculated as the count from a given subreddit divided by the daily total of stressed posts. This proportional formulation avoids collinearity with total post volume. Engagement metrics included the mean Reddit score across all records, the mean score restricted to posts only, and the mean comment count per post. Content type was captured as the post ratio, defined as the proportion of records that were original posts rather than comments.
+
+Academic calendar flags were assigned based on a multi-region calendar covering three major English-speaking higher education systems whose students dominate the four subreddits: the United States/Canada semester system, the United Kingdom term system, and the Australian southern-hemisphere semester system. For each day, `is_exam_period` was set to 1 if that date fell within an examination window in any of the three systems — for example, US spring finals (25 April – 15 May), UK summer exams (10 May – 20 June), or Australian Semester 1 exams (1 – 25 June). Similarly, `is_semester_break` was set to 1 if any regional system was in a formal break period. The union approach ensures that days on which students from at least one major system are under examination stress or on break are flagged, reflecting the mixed international composition of the subreddits. Additional calendar features included ISO week number, day of week (numeric and named), month, and a sequential day index used as a trend term in the GLM.
+
+Time-series diagnostic features were also computed: a seven-day centred rolling mean (`rolling_7d`), a standardised z-score for each day's stressed count relative to the overall series mean and standard deviation, and a binary spike indicator (`is_spike`) set to 1 for days with a z-score exceeding 2.0.
+
+### 3.5 Statistical Modelling: Negative Binomial GLM
+
+A Negative Binomial generalised linear model was fitted to the 705-day daily stressed post count series using the `statsmodels` library in Python. The choice of count regression rather than linear regression was justified by the discrete, non-negative nature of the outcome variable and the pronounced overdispersion present in the data: the variance-to-mean ratio of the daily stressed count series was **7.33**, far exceeding the equidispersion assumption of 1.0 required by Poisson regression (Cameron & Trivedi, 2013). To confirm this empirically, a Poisson GLM was fitted first and compared against the Negative Binomial model on information criteria.
+
+The model formula included week number as a continuous trend term, day-of-week as a categorical variable with Monday as the reference category, binary exam period and semester break flags, post ratio, mean score, mean comment count, and subreddit proportion terms for r/GradSchool, r/Students, and r/mentalhealth (with r/college excluded as the reference subreddit to avoid perfect collinearity among the proportion terms, which sum to approximately 1):
+
+```
+stressed ~ week_number
+         + C(day_of_week_name, Treatment('Monday'))
+         + is_exam_period + is_semester_break
+         + post_ratio + mean_score + mean_num_comments
+         + prop_GradSchool + prop_Students + prop_mentalhealth
+```
+
+The Negative Binomial model achieved an AIC of 5,997.47 compared to 6,547.73 for the Poisson model, a difference of 550.26 AIC units confirming substantially better fit with the more flexible distributional assumption. The estimated dispersion parameter alpha was 1.019 (p < 0.001), independently confirming significant overdispersion. Results were reported as Incidence Rate Ratios (IRRs), obtained by exponentiating the model coefficients, which represent multiplicative changes in the expected daily stressed post count associated with each predictor. Ninety-five percent confidence intervals and two-tailed p-values were computed from the model's variance-covariance matrix. Residual diagnostics were assessed through a two-panel plot of deviance residuals against fitted values and against date, examining systematic patterns that would indicate model misspecification.
+
+### 3.6 Time-Series Forecasting
+
+Walk-forward cross-validation was used to compare Prophet and SARIMA forecasting models under conditions that simulate real-world deployment, where a model trained on past data is used to forecast an immediately following unseen period. The expanding-window design was adopted: the training set always begins at the first observation and grows progressively with each validation window, while the test set is a fixed-length horizon of 21 days immediately following the training cut-off. Four validation windows were evaluated, with split points evenly distributed between a minimum training length of 180 days (to ensure sufficient historical data before the first forecast) and the 684th observation (leaving room for a 21-day test period at the end of the series).
+
+Both models received identical academic calendar information to ensure a fair comparison. For Prophet, the 12 academic event types — covering US/Canada spring and fall finals, UK winter and summer exams, Australian Semester 1 and 2 exams, and the corresponding break periods for all three systems — were passed as a holidays DataFrame, which Prophet uses natively to learn calendar-specific offsets. For SARIMA, the same events were converted into a binary indicator matrix with one column per event type and passed as exogenous regressors to SARIMAX, so that both models had access to the same predictive signals.
+
+**Prophet** was configured with yearly and weekly seasonality enabled, daily seasonality disabled, and a multiplicative seasonality mode. Multiplicative mode was selected because social media post volumes tend to scale in proportion to their baseline level — fluctuations during high-activity periods are larger in absolute terms than equivalent percentage fluctuations during low-activity periods — making a multiplicative decomposition more appropriate than an additive one for this data.
+
+**SARIMA** was specified as SARIMAX(1,1,1)(1,1,1,7), reflecting one autoregressive term, one order of differencing, one moving average term, and seasonal equivalents at a period of seven days corresponding to the weekly academic cycle. Before fitting, the training series was reindexed to a continuous daily date range and any missing dates were filled with a seven-day centred rolling mean, ensuring that gaps in the scraped data did not misalign the weekly seasonal period. This specification was adopted after a simpler ARIMA(1,1,1) without seasonal terms produced flat, uninformative forecasts that failed to reproduce the weekly oscillation visible in the training data.
+
+Forecast accuracy was evaluated using three complementary metrics: Mean Absolute Error (MAE), which measures the average magnitude of prediction errors in the original units of stressed posts per day; Root Mean Squared Error (RMSE), which penalises large errors more heavily through the squared term; and Mean Absolute Percentage Error (MAPE), which normalises errors relative to observed values and facilitates comparison across windows with different baseline levels. Performance was assessed both per window, to reveal how each model's accuracy changes as training data accumulates, and as the mean across all four windows, to provide an overall ranking.
+
+Following cross-validation, a final Prophet model was trained on the complete 705-day dataset and used to generate a 21-day forward forecast beyond the last observed date (19 December 2025), producing predicted daily stressed post counts with 95% uncertainty intervals.
+
+### 3.7 Ethical Considerations
+
+This research operated exclusively on publicly available Reddit data and did not involve direct interaction with human participants. Reddit's terms of service permit access to public post content for research purposes, and the Arctic Shift API provides access to already-publicly-archived Reddit data without circumventing any platform access controls. As such, formal ethical approval for human participant research was not required under the institution's guidelines for secondary data analysis of publicly available information.
+
+All analyses and outputs were conducted at the aggregate level — specifically, daily counts of classified posts — rather than at the individual record level. No individual users were identified, profiled, or tracked across the study. The final outputs (daily time series, GLM coefficients, and forecast values) contain no information that could be used to identify any individual Reddit user. Post identifiers and author pseudonyms present in the intermediate processing files were not reported in any research output.
+
+The study acknowledges the representativeness limitations inherent in Reddit-based research: Reddit's user base skews younger, more digitally engaged, and predominantly English-speaking, which may limit the generalisability of findings to student populations with lower platform engagement or from non-English-speaking academic contexts. These limitations are discussed further in Chapter 5. The research aligns with United Nations Sustainable Development Goal 3 (Good Health and Well-Being) and SDG 4 (Quality Education) by developing evidence-based tools for proactive monitoring of student mental health using non-invasive, aggregate-level data.
+
+*Section 3 word count: ~2,650*
+
+---
+
 *Word count: [TODO — state on last page before References]*

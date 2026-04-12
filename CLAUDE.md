@@ -60,18 +60,25 @@ Group classified posts by date into a daily time series of stressed post counts.
 Fit a GLM to explain WHY daily counts go up or down:
 
 ```
-stressed ~ week_number + C(day_of_week_name, Treatment('Monday'))
+stressed ~ week_number
+         + C(day_of_week_name, Treatment('Monday'))
+         + is_exam_period + is_semester_break
+         + post_ratio + mean_score + mean_num_comments
+         + prop_GradSchool + prop_Students + prop_mentalhealth
 ```
 
 Compare two models:
 - **Poisson** — assumes variance = mean (too simple for social media spikes)
-- **Negative Binomial** — handles overdispersion (winner, ΔAIC = 2,381)
+- **Negative Binomial** — handles overdispersion (winner, ΔAIC = 550.26)
 
 **Key results:**
 - Overdispersion ratio = 7.33 — NB justified
-- Weekend effect: Sat -18%, Sun -15%, Fri -11% vs Monday (all significant)
+- Weekend effect: Sat -18.0%, Sun -12.7%, Fri -12.3% vs Monday (all significant p<0.001)
 - Mon–Thu: no significant difference
-- Upward trend: +0.3%/week = +37% over 2 years
+- week_number: NOT significant (IRR=1.000, p=0.81) — no measurable upward trend
+- Exam period: +7.2% (IRR=1.072, p<0.001)
+- Semester break: -11.1% (IRR=0.889, p<0.001)
+- prop_mentalhealth: -44.5% (IRR=0.555, p<0.001)
 
 **Output:** `data/2years/4_irr_table.csv`, `4_model_comparison.csv`, `4_residuals.png`
 
@@ -83,12 +90,15 @@ Walk-forward validation (expanding window, 4 windows, horizon=21 days):
 
 | Model | Type | Result |
 |-------|------|--------|
-| Prophet | Facebook, yearly + weekly seasonality, multiplicative | Mean MAE = 32.01 |
-| SARIMA(1,1,1)(1,1,1,7) | Seasonal ARIMA, weekly period=7 | Mean MAE = 15.57 (Winner) |
+| Prophet | Facebook, yearly + weekly seasonality, multiplicative | Mean MAE = 35.67 |
+| SARIMA(1,1,1)(1,1,1,7) | Seasonal ARIMA, weekly period=7 | Mean MAE = 21.61 (Winner) |
+
+Per-window MAE: W1 Prophet=96.4/SARIMA=28.4 | W2 Prophet=18.2/SARIMA=21.9 | W3 Prophet=18.4/SARIMA=14.2 | W4 Prophet=9.8/SARIMA=22.0
 
 - ARIMA(1,1,1) was tested first but produced flat forecasts — replaced by SARIMA
-- Prophet beats SARIMA on Window 4 (MAE 10.7 vs 12.5) when trained on full 2-year data
+- Prophet beats SARIMA on Window 4 (MAE 9.8 vs 22.0) when trained on most data
 - Prophet needs at least 1 full year of data to learn yearly seasonality
+- Both models received identical academic calendar events (Prophet via holidays df, SARIMA via SARIMAX exog regressors)
 
 **Output:** `data/2years/5_cv_scores.csv`, `5_cv_summary.csv`, `5_cv_plot.png`, `5_final_forecast.csv`, `5_final_forecast.png`
 
@@ -105,7 +115,7 @@ Reddit Posts (4 subreddits, 2 years)
     ↓
 [src/3_aggregate_counts.py] → data/2years/3_daily_counts.csv (705 days)
     ↓
-[src/4_model_glm.py] → NB GLM: weekend effect + upward trend confirmed
+[src/4_model_glm.py] → NB GLM: weekend effect + exam/break effects confirmed; week_number not significant
     ↓
 [src/5_forecast.py] → SARIMA wins overall; Prophet competitive with full data
 ```

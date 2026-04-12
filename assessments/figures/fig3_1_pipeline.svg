@@ -1,0 +1,79 @@
+<svg width="840" height="185" viewBox="0 0 840 185" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+    </marker>
+    <clipPath id="c1"><rect x="20"  y="18" width="140" height="152" rx="6"/></clipPath>
+    <clipPath id="c2"><rect x="185" y="18" width="140" height="152" rx="6"/></clipPath>
+    <clipPath id="c3"><rect x="350" y="18" width="140" height="152" rx="6"/></clipPath>
+    <clipPath id="c4"><rect x="515" y="18" width="140" height="152" rx="6"/></clipPath>
+    <clipPath id="c5"><rect x="680" y="18" width="140" height="152" rx="6"/></clipPath>
+  </defs>
+
+  <!-- ── STEP 1: Data Collection ── -->
+  <rect x="20"  y="18" width="140" height="152" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="20"  y="18" width="140" height="30"  fill="#1e3a5f" clip-path="url(#c1)"/>
+  <text x="90"  y="38"  text-anchor="middle" fill="white"   font-size="11" font-weight="bold">Step 1</text>
+  <text x="90"  y="68"  text-anchor="middle" fill="#1e3a5f" font-size="10" font-weight="bold">Data Collection</text>
+  <text x="90"  y="86"  text-anchor="middle" fill="#475569" font-size="9">Arctic Shift API</text>
+  <text x="90"  y="100" text-anchor="middle" fill="#475569" font-size="9">r/college · r/Students</text>
+  <text x="90"  y="114" text-anchor="middle" fill="#475569" font-size="9">r/GradSchool</text>
+  <text x="90"  y="128" text-anchor="middle" fill="#475569" font-size="9">r/mentalhealth</text>
+  <text x="90"  y="148" text-anchor="middle" fill="#1e3a5f" font-size="9" font-weight="bold">138,058 records</text>
+
+  <!-- arrow 1 → 2 -->
+  <line x1="162" y1="94" x2="182" y2="94" stroke="#64748b" stroke-width="1.8" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 2: NLP Classification ── -->
+  <rect x="185" y="18" width="140" height="152" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="185" y="18" width="140" height="30"  fill="#1e3a5f" clip-path="url(#c2)"/>
+  <text x="255" y="38"  text-anchor="middle" fill="white"   font-size="11" font-weight="bold">Step 2</text>
+  <text x="255" y="68"  text-anchor="middle" fill="#1e3a5f" font-size="10" font-weight="bold">NLP Classification</text>
+  <text x="255" y="86"  text-anchor="middle" fill="#475569" font-size="9">VADER (neg ≥ 0.05)</text>
+  <text x="255" y="100" text-anchor="middle" fill="#475569" font-size="9">RoBERTa transformer</text>
+  <text x="255" y="114" text-anchor="middle" fill="#475569" font-size="9">Hybrid decision logic</text>
+  <text x="255" y="128" text-anchor="middle" fill="#475569" font-size="9">70,788 stressed (51.3%)</text>
+  <text x="255" y="148" text-anchor="middle" fill="#1e3a5f" font-size="9" font-weight="bold">40,531 flagged review</text>
+
+  <!-- arrow 2 → 3 -->
+  <line x1="327" y1="94" x2="347" y2="94" stroke="#64748b" stroke-width="1.8" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 3: Daily Aggregation ── -->
+  <rect x="350" y="18" width="140" height="152" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="350" y="18" width="140" height="30"  fill="#1e3a5f" clip-path="url(#c3)"/>
+  <text x="420" y="38"  text-anchor="middle" fill="white"   font-size="11" font-weight="bold">Step 3</text>
+  <text x="420" y="68"  text-anchor="middle" fill="#1e3a5f" font-size="10" font-weight="bold">Daily Aggregation</text>
+  <text x="420" y="86"  text-anchor="middle" fill="#475569" font-size="9">Group by date</text>
+  <text x="420" y="100" text-anchor="middle" fill="#475569" font-size="9">Academic calendar flags</text>
+  <text x="420" y="114" text-anchor="middle" fill="#475569" font-size="9">Engagement metrics</text>
+  <text x="420" y="128" text-anchor="middle" fill="#475569" font-size="9">Spike detection (z > 2)</text>
+  <text x="420" y="148" text-anchor="middle" fill="#1e3a5f" font-size="9" font-weight="bold">705-day time series</text>
+
+  <!-- arrow 3 → 4 -->
+  <line x1="492" y1="94" x2="512" y2="94" stroke="#64748b" stroke-width="1.8" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 4: Negative Binomial GLM ── -->
+  <rect x="515" y="18" width="140" height="152" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="515" y="18" width="140" height="30"  fill="#1e3a5f" clip-path="url(#c4)"/>
+  <text x="585" y="38"  text-anchor="middle" fill="white"   font-size="11" font-weight="bold">Step 4</text>
+  <text x="585" y="68"  text-anchor="middle" fill="#1e3a5f" font-size="10" font-weight="bold">Neg. Binomial GLM</text>
+  <text x="585" y="86"  text-anchor="middle" fill="#475569" font-size="9">Poisson vs Neg. Binom.</text>
+  <text x="585" y="100" text-anchor="middle" fill="#475569" font-size="9">Overdispersion = 7.33</text>
+  <text x="585" y="114" text-anchor="middle" fill="#475569" font-size="9">&#916;AIC = 550.26</text>
+  <text x="585" y="128" text-anchor="middle" fill="#475569" font-size="9">IRR analysis</text>
+  <text x="585" y="148" text-anchor="middle" fill="#1e3a5f" font-size="9" font-weight="bold">NB model wins</text>
+
+  <!-- arrow 4 → 5 -->
+  <line x1="657" y1="94" x2="677" y2="94" stroke="#64748b" stroke-width="1.8" marker-end="url(#arr)"/>
+
+  <!-- ── STEP 5: Forecasting ── -->
+  <rect x="680" y="18" width="140" height="152" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="680" y="18" width="140" height="30"  fill="#1e3a5f" clip-path="url(#c5)"/>
+  <text x="750" y="38"  text-anchor="middle" fill="white"   font-size="11" font-weight="bold">Step 5</text>
+  <text x="750" y="68"  text-anchor="middle" fill="#1e3a5f" font-size="10" font-weight="bold">Forecasting</text>
+  <text x="750" y="86"  text-anchor="middle" fill="#475569" font-size="9">Prophet (multiplicative)</text>
+  <text x="750" y="100" text-anchor="middle" fill="#475569" font-size="9">SARIMA(1,1,1)(1,1,1,7)</text>
+  <text x="750" y="114" text-anchor="middle" fill="#475569" font-size="9">Walk-forward, 4 windows</text>
+  <text x="750" y="128" text-anchor="middle" fill="#475569" font-size="9">21-day horizon</text>
+  <text x="750" y="148" text-anchor="middle" fill="#1e3a5f" font-size="9" font-weight="bold">SARIMA MAE = 21.61</text>
+</svg>
