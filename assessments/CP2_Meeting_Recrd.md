@@ -96,24 +96,21 @@ CP2 report draft (`CP2_REPORT.md`) completed covering all five chapters: Introdu
 
 ### Items Discussed in This Meeting
 
-Supervisor reviewed the CP2 report draft via email and provided the following written feedback:
+Student submitted the completed CP2 report draft to supervisor via email for review. A brief overview of the report was provided in the email:
 
-1. **Chapter 1 (Introduction):** Clarify the distinction between MRP5015 CP1 (proposal) and MRP5025 CP2 (implementation) in Section 1.1 so the reader understands this report presents the executed pipeline, not the original proposal.
-2. **Chapter 2 (Literature Review):** Add a brief note acknowledging that LSTM was proposed in CP1 but deprioritised in CP2 due to dataset size constraints.
-3. **Chapter 3 (Methodology):** Section 3.3 on hybrid NLP classification must explicitly state the justification for excluding discordant cases rather than resolving them arbitrarily. Supervisor noted: *"This is a strength of your design — make it sound like one."*
-4. **Chapter 4 (Findings):** Confirm all figure and table cross-references match the final numbering order before submission.
-5. **Chapter 5 (Conclusion):** The limitations section should name the 29.4% exclusion rate from discordant NLP classifications as a potential undercount of stressed posts.
-6. **References:** Three in-text citations were not matched in the reference list — student to audit all citations before final submission.
+1. **Structure:** Report covers five chapters — Introduction, Literature Review, Methodology, Findings & Results, and Conclusion — aligned with the pipeline stages agreed in the 14 March meeting.
+2. **Pipeline outputs:** All five stages completed and documented; key results include SARIMA(1,1,1)(1,1,1,7) achieving mean MAE of 21.61 vs Prophet's 35.67, and Negative Binomial GLM confirming significant exam period (+7.2%) and weekend effects.
+3. **Figures:** Three pipeline output figures (`4_residuals.png`, `5_cv_plot.png`, `5_final_forecast.png`) embedded with numbered captions.
+4. **References:** In-text citations formatted in APA 7th edition; reference list to be audited before submission.
+5. **Pending:** Supervisor feedback on the draft is awaited before final revisions and submission.
 
 ### Work for the Next Meeting
 
-1. Revise Chapter 1 to clearly frame CP2 as implementation of the CP1 proposal.
-2. Add LSTM deprioritisation justification to Chapter 2.
-3. Strengthen the exclusion justification for discordant classifications in Section 3.3.
-4. Audit all figure and table cross-references for consistency.
-5. Name the 29.4% exclusion rate as an explicit limitation in Chapter 5.
-6. Audit the full reference list — ensure every in-text citation has a corresponding entry.
-7. Attach the CP2 Assessment cover page and submit the final report via the XLearn portal.
+1. Await supervisor's written feedback on the CP2 report draft.
+2. Revise the report accordingly once feedback is received.
+3. Audit all in-text citations against the reference list.
+4. Confirm all figure and table cross-references are consistent.
+5. Attach the CP2 Assessment cover page and submit the final report via the XLearn portal.
 
 ---
 
