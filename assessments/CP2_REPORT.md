@@ -112,7 +112,22 @@ However, lexicon-based methods demonstrate critical limitations when applied to 
 
 More recent studies have adopted transformer-based models such as BERT (Bidirectional Encoder Representations from Transformers) and RoBERTa (Robustly Optimised BERT Pretraining Approach) to enhance sentiment analysis accuracy (Devlin et al., 2019; Liu et al., 2019). These deep learning architectures leverage contextual embeddings to understand relationships between words and phrases, enabling the detection of complex emotional patterns that lexicon-based methods miss (Bello et al., 2023). Transformer models can recognise implicit expressions of stress, multi-sentiment sentences, and domain-specific language common in academic discourse (Mehreen et al., 2024). Pre-trained models fine-tuned on mental health and social media sentiment datasets have demonstrated strong cross-domain performance, with RoBERTa in particular showing robust results when applied to Reddit data despite being originally trained on Twitter sentiment (Fahmi & Nababan, 2025).
 
-However, transformer-based models sacrifice interpretability for accuracy. Their classification decisions emerge from complex interactions across millions of parameters, making it difficult for researchers or institutional stakeholders to understand why a specific post was classified as stressed or not stressed. This opacity is problematic in sensitive domains such as mental health, where classification decisions may inform institutional responses affecting student welfare. Additionally, transformer models require substantially greater computational resources than lexicon-based alternatives, creating practical deployment challenges for real-time monitoring applications (Liu et al., 2019). These trade-offs between accuracy and interpretability motivate the exploration of hybrid approaches that combine the strengths of both paradigms.
+However, transformer-based models sacrifice interpretability for accuracy. Their classification decisions emerge from complex interactions across millions of parameters, making it difficult for researchers or institutional stakeholders to understand why a specific post was classified as stressed or not stressed. This opacity is problematic in sensitive domains such as mental health, where classification decisions may inform institutional responses affecting student welfare. Additionally, transformer models require substantially greater computational resources than lexicon-based alternatives, creating practical deployment challenges for real-time monitoring applications (Liu et al., 2019). These trade-offs between accuracy and interpretability motivate the exploration of hybrid approaches that combine the strengths of both paradigms. Table 2.1 summarises the key differences between the two paradigms.
+
+**Table 2.1.** Comparison of Lexicon-Based and Transformer-Based NLP Approaches
+
+| Criterion | VADER (Lexicon-Based) | RoBERTa (Transformer-Based) |
+|---|---|---|
+| **Mechanism** | Dictionary lookup; scores words using predefined sentiment lexicon | Contextual embeddings; learns word relationships from large corpora |
+| **Interpretability** | High — classification driven by identifiable lexical features | Low — decisions emerge from millions of opaque parameters |
+| **Contextual understanding** | Limited — misses sarcasm, irony, and implicit stress | Strong — captures nuance, context, and multi-sentiment expressions |
+| **Computational cost** | Low — processes large datasets in seconds | High — requires GPU for efficient inference |
+| **Training requirement** | None — rule-based, no training data needed | Pre-trained on large corpora; fine-tuning improves domain fit |
+| **Suitability for mental health** | Good for explicit distress keywords; poor for subtle expression | Strong for nuanced emotional states; poor for explainability |
+| **Key limitation** | Cannot detect "I just love pulling all-nighters" as stressed | Cannot explain why a specific post was classified as stressed |
+| **Key references** | Hutto & Gilbert (2014); Villanueva-Miranda et al. (2025) | Devlin et al. (2019); Liu et al. (2019); Fahmi & Nababan (2025) |
+
+*Note.* This study combines both approaches in a hybrid design to leverage VADER's interpretability alongside RoBERTa's contextual accuracy.
 
 #### 2.1.4 Hybrid Approaches and the Classification Gap
 
@@ -206,11 +221,30 @@ Most existing studies that do examine temporal patterns in social media sentimen
 
 Ethical and representativeness considerations are central to the responsible use of social media data for mental health research. While Reddit data are publicly available and do not require explicit informed consent, ethical principles demand careful stewardship of user-generated content (Gillespie, 2024). Anonymisation and adherence to platform-specific terms of service are essential to protect user identities. Additionally, social media users may not represent the broader student population: Reddit users tend to be younger, more digitally engaged, and predominantly from English-speaking countries, introducing potential sampling bias that limits the generalisability of findings (Massanari & Proferes, 2020). Furthermore, there is a risk that identifying predictable stress surges could enable inappropriate surveillance or targeting of vulnerable student populations, necessitating clear ethical guidelines for how predictive outputs are used by institutional stakeholders (Takats et al., 2022). These considerations are frequently acknowledged in the literature but rarely operationalised in modelling frameworks, highlighting the need for research that addresses ethical practice alongside methodological innovation.
 
+Table 2.2 summarises the key studies reviewed across the three domains, highlighting their methodological approaches, key findings, and the specific gaps that the current study addresses.
+
+**Table 2.2.** Summary of Key Studies and Research Gaps Addressed
+
+| Study | Domain | Method | Key Finding | Gap Addressed by This Study |
+|---|---|---|---|---|
+| Hutto & Gilbert (2014) | NLP | VADER lexicon | Effective for social media sentiment; compound score -1 to +1 | Misses sarcasm and context → hybrid approach needed |
+| Devlin et al. (2019) | NLP | BERT transformer | Contextual embeddings outperform lexicon methods | Low interpretability → paired with VADER for transparency |
+| Liu et al. (2019) | NLP | RoBERTa | Robustly optimised BERT; strong cross-domain transfer | Rarely combined with lexicon methods in mental health |
+| Saha et al. (2022) | NLP + Mental Health | Social media analysis | Reddit discussions predict campus counselling demand | Cross-sectional only; no temporal forecasting |
+| Oryngozha et al. (2024) | NLP + Mental Health | Stress detection on Reddit | Identified stress posts in academic subreddits | Snapshot analysis; no daily count aggregation |
+| Cameron & Trivedi (2013) | Count Models | Poisson / NB regression | Framework for discrete, non-negative count data | Rarely applied to NLP-derived social media counts |
+| Lindén & Mäntyniemi (2011) | Count Models | Negative Binomial | Handles overdispersion in ecological count data | Not applied to student mental health time series |
+| Taylor & Letham (2018) | Forecasting | Prophet | Decomposes trend, seasonality, and events | Not compared with SARIMA on NLP stress counts |
+| Box et al. (2015) | Forecasting | ARIMA / SARIMA | Captures autocorrelation and seasonal patterns | Rarely applied to NLP-derived mental health data |
+| Ng et al. (2023) | Forecasting | Baseline comparison | ARIMA estimates volume but misses temporal patterns | No integration with NLP classification pipeline |
+
+*Note.* This study integrates methods across all three domains within a single end-to-end pipeline, addressing the integration gap that persists across the reviewed literature.
+
 #### 2.4.5 How This Study Addresses These Gaps
 
 This study explicitly addresses the integration, hybrid classification, temporal granularity, and ethical gaps identified above. First, it implements a complete end-to-end pipeline from Reddit data collection through NLP classification, count aggregation, Negative Binomial regression, and comparative time-series forecasting, enabling assessment of how each component contributes to overall predictive performance. Second, it employs a hybrid VADER-RoBERTa classification approach that systematically compares the two methods and uses their concordance as a quality indicator, with discordant cases flagged for manual review rather than being arbitrarily resolved by either model alone. Third, it analyses daily stress counts over a two-year period spanning multiple academic cycles, providing the temporal depth needed to evaluate both seasonal forecasting models and the stability of observed patterns. Fourth, it operationalises ethical considerations by conducting all analyses on aggregated daily counts rather than individual-level data, ensuring no individual user can be identified from research outputs. By bridging these traditionally separate research domains within a single analytical framework, the study advances both methodological practice and practical capability for proactive student mental health monitoring.
 
-*Section 2 word count: 4,100*
+*Section 2 word count: 4,681*
 
 ---
 
