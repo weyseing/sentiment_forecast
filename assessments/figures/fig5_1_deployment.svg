@@ -1,0 +1,70 @@
+<svg width="840" height="215" viewBox="0 0 840 215" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+    </marker>
+    <!-- Clip headers to rounded-rect box shape -->
+    <clipPath id="cp1"><rect x="20"  y="25" width="250" height="165" rx="6"/></clipPath>
+    <clipPath id="cp2"><rect x="295" y="25" width="250" height="165" rx="6"/></clipPath>
+    <clipPath id="cp3"><rect x="570" y="25" width="250" height="165" rx="6"/></clipPath>
+  </defs>
+
+  <!-- ══ PHASE 1 ══ -->
+  <rect x="20"  y="25" width="250" height="165" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="20"  y="25" width="250" height="30"  fill="#1e3a5f" clip-path="url(#cp1)"/>
+  <text x="145" y="45" text-anchor="middle" fill="white"   font-size="11" font-weight="bold">Phase 1 — Months 0–12</text>
+
+  <text x="145" y="70" text-anchor="middle" fill="#1e3a5f" font-size="10" font-weight="bold">SARIMA(1,1,1)(1,1,1,7)</text>
+  <text x="145" y="85" text-anchor="middle" fill="#475569" font-size="9">Training data: &lt; 365 days</text>
+  <text x="145" y="99" text-anchor="middle" fill="#475569" font-size="9">Expected MAE: ~28 posts/day</text>
+  <text x="145" y="113" text-anchor="middle" fill="#475569" font-size="9">Reliable with limited history</text>
+
+  <line x1="35" y1="125" x2="255" y2="125" stroke="#cbd5e1" stroke-width="1"/>
+
+  <text x="145" y="140" text-anchor="middle" fill="#334155" font-size="8.5" font-weight="bold">Establish weekly baseline;</text>
+  <text x="145" y="153" text-anchor="middle" fill="#334155" font-size="8.5" font-weight="bold">calibrate seasonal parameters</text>
+  <text x="145" y="180" text-anchor="middle" fill="#94a3b8" font-size="8" font-style="italic">Yearly seasonality not yet learnable</text>
+
+  <!-- arrow 1 → 2 -->
+  <line x1="272" y1="108" x2="292" y2="108" stroke="#64748b" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="282" y="101" text-anchor="middle" fill="#64748b" font-size="8">~12 mo.</text>
+
+  <!-- ══ PHASE 2 ══ -->
+  <rect x="295" y="25" width="250" height="165" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="295" y="25" width="250" height="30"  fill="#155e75" clip-path="url(#cp2)"/>
+  <text x="420" y="45" text-anchor="middle" fill="white"   font-size="11" font-weight="bold">Phase 2 — Months 12–24</text>
+
+  <text x="420" y="70" text-anchor="middle" fill="#155e75" font-size="10" font-weight="bold">SARIMA + Prophet (parallel)</text>
+  <text x="420" y="85" text-anchor="middle" fill="#475569" font-size="9">Training data: 365–730 days</text>
+  <text x="420" y="99" text-anchor="middle" fill="#475569" font-size="9">SARIMA MAE ~14–22  /  Prophet ~9–22</text>
+  <text x="420" y="113" text-anchor="middle" fill="#475569" font-size="9">Crossover begins ~400 days</text>
+
+  <line x1="310" y1="125" x2="530" y2="125" stroke="#cbd5e1" stroke-width="1"/>
+
+  <text x="420" y="140" text-anchor="middle" fill="#334155" font-size="8.5" font-weight="bold">Compare models weekly;</text>
+  <text x="420" y="153" text-anchor="middle" fill="#334155" font-size="8.5" font-weight="bold">validate yearly seasonality</text>
+  <text x="420" y="180" text-anchor="middle" fill="#94a3b8" font-size="8" font-style="italic">Shift weight to Prophet as data grows</text>
+
+  <!-- arrow 2 → 3 -->
+  <line x1="547" y1="108" x2="567" y2="108" stroke="#64748b" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="557" y="101" text-anchor="middle" fill="#64748b" font-size="8">~24 mo.</text>
+
+  <!-- ══ PHASE 3 ══ -->
+  <rect x="570" y="25" width="250" height="165" rx="6" fill="#f1f5f9" stroke="#334155" stroke-width="1.5"/>
+  <rect x="570" y="25" width="250" height="30"  fill="#065f46" clip-path="url(#cp3)"/>
+  <text x="695" y="45" text-anchor="middle" fill="white"   font-size="11" font-weight="bold">Phase 3 — Month 24+</text>
+
+  <text x="695" y="70" text-anchor="middle" fill="#065f46" font-size="10" font-weight="bold">Prophet + SARIMA ensemble</text>
+  <text x="695" y="85" text-anchor="middle" fill="#475569" font-size="9">Training data: 2+ academic years</text>
+  <text x="695" y="99" text-anchor="middle" fill="#475569" font-size="9">Expected MAE: ~10–18 posts/day</text>
+  <text x="695" y="113" text-anchor="middle" fill="#475569" font-size="9">Full yearly seasonality learned</text>
+
+  <line x1="585" y1="125" x2="805" y2="125" stroke="#cbd5e1" stroke-width="1"/>
+
+  <text x="695" y="140" text-anchor="middle" fill="#334155" font-size="8.5" font-weight="bold">Automated 21-day alerts;</text>
+  <text x="695" y="153" text-anchor="middle" fill="#334155" font-size="8.5" font-weight="bold">rolling model retraining</text>
+  <text x="695" y="180" text-anchor="middle" fill="#94a3b8" font-size="8" font-style="italic">Proactive resource scheduling enabled</text>
+
+  <!-- footnote -->
+  <text x="420" y="208" text-anchor="middle" fill="#94a3b8" font-size="8">MAE ranges derived from walk-forward validation Windows 1–4 (horizon = 21 days).</text>
+</svg>
