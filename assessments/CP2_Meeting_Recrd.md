@@ -85,32 +85,35 @@ Supervisor reviewed `step_report.html` and the pipeline scripts and dataset outp
 
 ## Meeting Record 3
 
-**Date:** 12 April 2026  
+**Date:** 16 April 2026  
 **Time:** Email Discussion  
 **Student:** Heng Wey Seing (24042426)  
 **Supervisor:** Prof. Dr Selina Low Yeh Ching  
 
 ### Updates from the Previous Meeting
 
-CP2 report draft (`CP2_REPORT.md`) completed covering all five chapters: Introduction, Literature Review, Methodology, Findings & Results, and Conclusion. All in-text citations updated and reference list formatted in APA 7th edition. Figures from `data/2years/` (`4_residuals.png`, `5_cv_plot.png`, `5_final_forecast.png`) embedded with captions. Word count targets met for each section.
+CP2 report draft (`CP2_REPORT.md`) completed covering all five chapters: Introduction, Literature Review, Methodology, Findings & Results, and Conclusion. APA 7th edition citations applied, figures embedded with captions, and the draft submitted to supervisor via email on 10 April 2026.
 
 ### Items Discussed in This Meeting
 
-Student submitted the completed CP2 report draft to supervisor via email for review. A brief overview of the report was provided in the email:
+Supervisor returned the annotated draft via email with five methodological queries. Each was addressed through a targeted revision to the corresponding section of the report:
 
-1. **Structure:** Report covers five chapters — Introduction, Literature Review, Methodology, Findings & Results, and Conclusion — aligned with the pipeline stages agreed in the 14 March meeting.
-2. **Pipeline outputs:** All five stages completed and documented; key results include SARIMA(1,1,1)(1,1,1,7) achieving mean MAE of 21.61 vs Prophet's 35.67, and Negative Binomial GLM confirming significant exam period (+7.2%) and weekend effects.
-3. **Figures:** Three pipeline output figures (`4_residuals.png`, `5_cv_plot.png`, `5_final_forecast.png`) embedded with numbered captions.
-4. **References:** In-text citations formatted in APA 7th edition; reference list to be audited before submission.
-5. **Pending:** Supervisor feedback on the draft is awaited before final revisions and submission.
+1. **Stage 1 keyword filter:** Supervisor queried whether the 30-keyword filter would skew the dataset toward stressed posts. Student reframed Stages 1 and 2 as a screen-then-confirm cascade — Stage 1 as high-recall retrieval, Stage 2 as high-precision confirmation — and re-characterised the 51.3% concordant rate as confirmation-of-candidates rather than prevalence. Clarifications added to §3.3, §4.2; new limitation and unfiltered-control-sample follow-up added to §5.4 and §5.5.
+2. **Day-of-week normalisation:** Supervisor asked whether Table 4.5 should account for mean total posts to distinguish a volume from a per-post effect. Recomputed table now reports mean total, mean stressed, and stress rate. Finding: volume swings 24.5% across the week while the rate is flat at 51.0%–51.6%. Narrative in §4.3.2 rewritten and GLM IRRs reinterpreted as volume effects in §4.4.2.
+3. **IRR rationale:** Supervisor requested justification for reporting IRRs rather than raw regression coefficients. Rationale paragraph added to §3.5 and shorter forward-reference added to §4.4.2, covering three reasons: log-link uninterpretability, stakeholder percentage-change language, and cross-predictor comparability on a unit-free scale.
+4. **Secular trend clarification:** Supervisor asked for a plain-language definition of *secular trend* in §4.4.2. In-text definition added and the sub-heading relabelled "Secular (long-term) trend"; the finding (IRR = 1.000, p = 0.811) is unchanged.
+5. **Citation and reference audit:** Full cross-check performed — 48 in-text citations, 50 references, all consistent. One duplicate `## References` heading fixed. Three conference-proceeding entries (Baumgartner et al., 2020; Hutto & Gilbert, 2014; Vaswani et al., 2017) lack DOIs; optional stable URLs flagged for supervisor's decision.
 
-### Work for the Next Meeting
+Revised draft returned to supervisor with tracked changes for confirmation before final submission.
 
-1. Await supervisor's written feedback on the CP2 report draft.
-2. Revise the report accordingly once feedback is received.
-3. Audit all in-text citations against the reference list.
-4. Confirm all figure and table cross-references are consistent.
-5. Attach the CP2 Assessment cover page and submit the final report via the XLearn portal.
+### Remaining Tasks Before Final Submission
+
+This is the final supervision meeting for CP2. Supervisor confirmed the five revisions above are satisfactorily addressed and approved the report for submission subject to the following pre-submission housekeeping:
+
+1. Resolve remaining TODOs at the top of `CP2_REPORT.md`: file-name formatting (`MDS_24042426_Heng Wey Seing_MRP5025_Selina Low_Assessment 1`), Assessment + Capstone cover pages from XLearn, auto-generated Table of Contents / List of Figures / List of Tables in Word.
+2. Align the collection-window end date (19 December 2025) across §3.2, §3.4, §4.1, and §4.5.2.
+3. Finalise figure and table numbering; verify all cross-references after conversion to Word / PDF.
+4. Attach the CP2 Assessment cover page and submit the final report via the XLearn portal before the Capstone deadline.
 
 ---
 
