@@ -448,21 +448,25 @@ The peak day — 9 December 2024 (199 stressed posts) — falls precisely within
 
 #### 4.3.2 Day-of-Week Pattern
 
-Table 4.5 shows mean daily stressed post counts by day of the week across the full 705-day series.
+Table 4.5 shows mean daily total posts, mean daily stressed posts, and the resulting stress rate by day of the week across the full 705-day series. Reporting both the absolute stressed count and the stress rate (stressed divided by total posts) is necessary to distinguish between two very different interpretations of any observed weekly pattern: a genuine shift in per-post stress expression versus a shift in overall Reddit posting activity.
 
-**Table 4.5.** Mean Daily Stressed Post Count by Day of Week
+**Table 4.5.** Mean Daily Total Posts, Stressed Posts, and Stress Rate by Day of Week
 
-| Day | Mean Stressed Posts/Day |
-|---|---|
-| Wednesday | 109.2 |
-| Tuesday | 109.1 |
-| Monday | 106.7 |
-| Thursday | 104.3 |
-| Friday | 95.3 |
-| Sunday | 90.9 |
-| Saturday | 87.1 |
+| Day | Mean Total Posts/Day | Mean Stressed Posts/Day | Stress Rate |
+|---|---|---|---|
+| Monday | 209.1 | 106.7 | 51.0% |
+| Tuesday | 211.6 | 109.1 | 51.6% |
+| Wednesday | 212.2 | 109.2 | 51.5% |
+| Thursday | 204.3 | 104.3 | 51.0% |
+| Friday | 186.2 | 95.3 | 51.2% |
+| Saturday | 170.5 | 87.1 | 51.1% |
+| Sunday | 176.5 | 90.9 | 51.5% |
 
-A consistent weekday–weekend gradient is apparent. Mid-week days (Tuesday and Wednesday) show the highest average counts, approximately 25% above Saturday's average. This pattern likely reflects the timing of academic deadlines, class schedules, and assignment submission windows, which are concentrated midweek. The gradual decline from Thursday through Saturday, with a slight recovery on Sunday as the upcoming week approaches, is consistent with weekly academic cycles documented in prior literature (Soyiri & Reidpath, 2012).
+*Note.* Stress rate is the mean daily ratio of concordantly stressed posts to total posts (sum of stressed, not stressed, and needs-review records) classified on that day.
+
+A consistent weekday–weekend gradient is apparent in the absolute stressed post count: mid-week days (Tuesday and Wednesday) show the highest averages, approximately 25% above Saturday's average. However, once the count is normalised by the mean total post volume per day, this gradient disappears almost entirely. The stress rate is remarkably stable across all seven days, ranging narrowly from 51.0% (Monday, Thursday) to 51.6% (Tuesday) — a spread of only 0.6 percentage points despite total post volume ranging from 170.5 (Saturday) to 212.2 (Wednesday), a 24.5% swing. In other words, the weekly pattern in stressed counts is almost entirely driven by when students post on Reddit, not by how stressed they are when they do post. Students who post on a Saturday are just as likely to be expressing stress as students who post on a Wednesday; there are simply fewer of them.
+
+This decomposition has an important implication for the interpretation of the Negative Binomial GLM day-of-week incidence rate ratios presented in Section 4.4.2. The significant weekend IRRs (Saturday −18.0%, Sunday −12.7%, Friday −12.3% relative to Monday) should be understood as total-volume effects rather than per-post stress-rate effects: the reduction in expected daily stressed count on weekends operates through lower total Reddit activity, not through any per-capita shift in the likelihood of stress expression. This interpretation is consistent with the weekly academic-cycle literature (Soyiri & Reidpath, 2012) but adds a methodological nuance rarely articulated in prior work, which tends to present such cyclic patterns as evidence of a behavioural stress cycle without separating the volume and rate components. For the forecasting task, which targets absolute stressed-post volumes, this distinction does not alter the operational value of the predictions; for the causal interpretation of day-of-week effects, however, it argues against inferring any direct link between the calendar day and students' underlying stress experience.
 
 Figure 4.1 plots monthly mean stressed posts per day across 2024 and 2025, revealing the yearly seasonality that motivates the inclusion of Prophet's yearly seasonality component. Stress volumes peak during examination windows (May–June and November–December) and dip during summer and winter breaks.
 
