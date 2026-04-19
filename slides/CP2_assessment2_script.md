@@ -32,7 +32,7 @@ But when I read past studies, I found that no one has done the full job from sta
 
 **First — the integration gap.** Most studies stop at labelling posts. They mark posts as stressed or not stressed, and that is it. Very few researchers go further and predict what will happen next.
 
-**Second — the classification gap.** Studies use VADER **or** RoBERTa, but not both together. And when the two tools disagree, they usually just throw those posts away without explaining why.
+**Second — the classification gap.** Studies use VADER **or** RoBERTa, but not both together. And when the two tools disagree, they usually just throw those posts away without saying so or explaining why.
 
 **Third — the time-coverage gap.** Most datasets are shorter than one academic year, and use weekly averages. Daily patterns across two full years have not been studied.
 
@@ -44,7 +44,7 @@ So my research question is this: **Can a hybrid NLP and time-series pipeline, us
 
 To answer that research question, I set three specific objectives — one for each gap I found in the literature.
 
-**Objective 1 — for the classification gap.** Detect stress in Reddit posts using **two NLP models together**, VADER and RoBERTa. When both agree, the label is high confidence. When they disagree, the post is **flagged for review, not thrown away**. This gives the output at Stages 1 and 2.
+**Objective 1 — for the classification gap.** Detect stress in Reddit posts using **two NLP models together**, VADER and RoBERTa. When both agree, the label is high confidence. When they disagree, the post is **transparently excluded** — originally I planned to review those manually, but with 40,500 disagreement cases this was not feasible, and the 97,527 agreement set was already large enough for robust modelling. This gives the output at Stages 1 and 2.
 
 **Objective 2 — for the time-coverage gap.** Find out **what drives daily stress counts over a full two-year period**. I group the labelled posts into a 705-day time series and fit a Negative Binomial regression. This measures the effect of day of the week, exam periods, and semester breaks. Results are reported as **percentage change**, because that is easier for a non-statistician — for example, a university staff member — to understand.
 
@@ -65,7 +65,7 @@ These two stages handle data collection and labelling.
 - **VADER** is a dictionary-based tool from Hutto and Gilbert in 2014. It is very fast, but it misses sarcasm and context.
 - **RoBERTa** is a deep learning model from Liu and colleagues in 2019. It understands context, including sarcasm and negation, but it is slower.
 
-The main idea of my method: I use **agreement between the two models as a confidence signal**. Both say stressed → label 1. Both say not stressed → label 0. They disagree → flagged for manual review. This is what makes my approach different from prior work, which usually picks one model and hides the doubt.
+The main idea of my method: I use **agreement between the two models as a confidence signal**. Both say stressed → label 1. Both say not stressed → label 0. They disagree → transparently excluded from the modelling set. I originally planned to review these disagreements manually, but with around 40,500 disagreement cases the volume was too large for one researcher, and the agreement set was already big enough to model robustly. What makes my approach different from prior work is not that I kept the disagreements, but that I **report them openly as a limitation** instead of silently dropping them.
 
 ---
 
@@ -103,11 +103,13 @@ Let us look at what the NLP stage produced.
 
 Out of **138,058 posts**, the two models **agreed on 70.6%** of them. That is **97,527 high-confidence labels**. Of those agreement cases, **51.3% were labelled as stressed**, and **19.4% as not stressed**.
 
-The remaining **29.4% — about 40,500 posts** — were flagged for manual review because VADER and RoBERTa disagreed. That 29.4% is roughly the share of unclear, sarcastic, or context-heavy posts where a simple dictionary tool and a deep learning model see things differently.
+The remaining **29.4% — about 40,500 posts** — were disagreements between VADER and RoBERTa. That 29.4% is roughly the share of unclear, sarcastic, or context-heavy posts where a simple dictionary tool and a deep learning model see things differently.
+
+Originally, I planned to review these disagreements manually. But with 40,500 cases, the volume was too large for one researcher to get through. Since the 97,527 agreement cases were already a large, clean dataset for modelling, I excluded the disagreements from the analysis.
 
 This is important for two reasons.
 
-**First — transparency.** Past studies usually throw away disagreements without saying so, and the reader never sees that the choice was made. My pipeline keeps those posts visible. The researcher, or a future human reviewer, can decide what to do with them later.
+**First — transparency.** Past studies usually throw away disagreements without saying so, and the reader never sees that the choice was made. My pipeline reports this exclusion openly and quantifies exactly how many posts were dropped and why.
 
 **Second — quality.** By keeping only the cases where two independent models agree, the labels that go forward into Stage 3 are more trustworthy than a single-model pipeline would produce.
 
@@ -190,7 +192,7 @@ Now the **limitations** — three things I want to be honest about.
 
 **Limitation 1:** The keyword filter pushes collection toward stressed content. This was on purpose — cast a wide net first, then Stage 2 confirms which posts are really stressed.
 
-**Limitation 2:** We left out the 29.4% disagreement posts. This gives clean labels, but we lose 40,500 posts that might still carry useful signal.
+**Limitation 2:** We left out the 29.4% disagreement posts. Manual review was planned but not feasible at 40,500 cases for a single researcher. This gives clean labels, but we lose 40,500 posts that might still carry useful signal.
 
 **Limitation 3:** Reddit users are not a random sample of students. The results reflect **what Reddit users say**, not the stress level of all students in general.
 
@@ -214,7 +216,7 @@ To conclude.
 
 All three research questions are answered.
 
-- **RQ1 — stress detection.** The hybrid VADER + RoBERTa pipeline worked, with 70.6% agreement on 138,000 posts. Disagreements are flagged, not guessed.
+- **RQ1 — stress detection.** The hybrid VADER + RoBERTa pipeline worked, with 70.6% agreement on 138,000 posts. Disagreements are transparently excluded, not silently guessed.
 - **RQ2 — calendar drivers.** Weekend drops of 12 to 18%, exam-period rise of 7.2%, semester-break drop of 11.1%. Stress follows the academic calendar, not a long-term trend.
 - **RQ3 — forecasting.** SARIMA wins overall with MAE 21.61; Prophet becomes the better long-run choice once two or more years of daily data are available.
 
