@@ -220,7 +220,7 @@ All three research questions are answered.
 
 **Future work.** Unfiltered control sample; LSTM with three or more years of data; cross-platform checks on X or Discord; a live warning dashboard; and multilingual subreddits.
 
-Thank you. I am happy to take your questions.
+Thank you for watching this presentation. I would also like to thank my supervisor, Prof. Dr Selina Low Yeh Ching, for her guidance throughout this project.
 
 ---
 
