@@ -81,17 +81,21 @@ Why separate the GLM and the forecast? They answer different questions. **The GL
 
 ---
 
-## Slide 6 — Tools (35 sec)
+## Slide 6 — Tools (1 min)
 
-A quick word on tools.
+Now a quick word on the tools I used, and why I picked each one.
 
-- **Arctic Shift API** — free, no key, historical archive.
-- **VADER + RoBERTa** — hybrid classifier.
-- **statsmodels** — for the GLM.
-- **Facebook Prophet** — for yearly and holiday effects.
-- **SARIMA** — for the weekly pattern.
+- **Arctic Shift API** — this is how I collected the Reddit data. It is free, needs no API key, and has no rate limit. I chose it over the official Reddit API because the official one costs money and blocks large historical pulls. Arctic Shift lets me go back two full years without any problem.
 
-Every tool is open source and free. Any university can run this pipeline.
+- **VADER and RoBERTa** — the two NLP models for labelling. VADER is fast and simple — good as a first check. RoBERTa is slower but understands context and sarcasm. Running both together gives stronger labels than either one alone.
+
+- **statsmodels in Python** — for the GLM, both Poisson and Negative Binomial. It is the standard statistics library in Python, well tested, and gives me clean p-values and confidence intervals.
+
+- **Facebook Prophet** — for the forecast. Prophet is designed for business time series with yearly and weekly patterns and holiday effects, which fits the academic calendar well.
+
+- **SARIMA from statsmodels** — the classic seasonal ARIMA model. It handles the strong 7-day weekly pattern directly, and acts as a solid baseline to compare Prophet against.
+
+Every tool is **open source and free**. Any university could take my scripts and run this pipeline on their own data, at zero cost.
 
 ---
 
@@ -136,7 +140,7 @@ Meaning: students **switch off from school topics on weekends**.
 
 **Subreddit mix:** when r/mentalhealth share goes up, academic stress posts drop by 44.5%. That makes sense — r/mentalhealth is broader than school stress.
 
-The most important finding is a **negative one**: week number is **not significant**, p equals 0.81. Over two years, there is **no upward trend**. Stress is cyclical — it follows the calendar — it is **not** getting worse each year.
+The most important finding is a **negative one**: week number is **not significant**, p equals 0.81. Over two years, there is **no upward trend**. Stress repeats the same pattern every year — it follows the calendar — it is **not** getting worse each year.
 
 ---
 
@@ -178,7 +182,7 @@ So what do these findings mean?
 
 **Second — the model-choice finding.** SARIMA wins short-term, Prophet wins long-term. A simple rule: one year of data → use SARIMA. Two years or more → switch to Prophet.
 
-**Third — the no-trend finding.** Stress did **not** grow over two years. The problem is **cyclical, not worsening**. The right response is **timed support during exams**, not hiring more permanent staff.
+**Third — the no-trend finding.** Stress did **not** grow over two years. The problem **repeats every year, it is not getting worse**. The right response is **timed support during exams**, not hiring more permanent staff.
 
 Now the **limitations** — three honest points.
 
@@ -229,7 +233,7 @@ Thank you. I am happy to take your questions.
 | 3 | Objectives | 1:00 | |
 | 4 | Methodology 1–2 | 1:00 | |
 | 5 | Methodology 3–5 | 1:00 | |
-| 6 | Tools | 0:35 | short |
+| 6 | Tools | 1:00 | |
 | 7 | NLP findings | 1:00 | |
 | 8 | GLM findings | 1:30 | **most important** |
 | 9 | Forecasting | 1:15 | **important** |
@@ -237,7 +241,7 @@ Thank you. I am happy to take your questions.
 | 11 | Discussion | 1:10 | **important** |
 | 12 | Contributions | 1:15 | **important** |
 | 13 | Conclusion | 0:50 | |
-| **Total** | | **~12:00** | |
+| **Total** | | **~12:20** | |
 
 At a normal academic pace (~125 wpm), this lands at around 12 minutes. If you go faster (~140 wpm), about 11 minutes — leaves buffer for Q&A.
 
